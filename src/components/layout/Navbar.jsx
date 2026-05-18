@@ -7,6 +7,7 @@ const NAV_LINKS = [
   { label: 'Shop',             href: '/shop' },
   { label: 'Fragrance Finder', href: '/finder' },
   { label: 'Custom Lab',       href: '/lab' },
+  { label: 'Hybrid Creator',   href: '/hybrid' },
   { label: 'The Quiz',         href: '/quiz' },
   { label: 'Gifting',          href: '/gifting' },
   { label: 'Journal',          href: '/journal' },

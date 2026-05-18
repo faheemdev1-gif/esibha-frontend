@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom';
 
 const COLS = [
-  { title: 'Explore',  links: [['Shop',           '/shop'],['Fragrance Finder','/finder'],['Custom Lab',    '/lab'],['The Quiz',  '/quiz'],['Gifting',      '/gifting']] },
+  { title: 'Explore',  links: [['Shop',           '/shop'],['Fragrance Finder','/finder'],['Custom Lab',    '/lab'],['Hybrid Creator','/hybrid'],['The Quiz',  '/quiz'],['Gifting',      '/gifting']] },
   { title: 'Brand',    links: [['Our Story',      '/about'],['Journal',         '/journal'],['Hybrid Creator','/hybrid'],['Contact',  '/contact']] },
   { title: 'Support',  links: [['Shipping Policy','/shipping'],['Returns',      '/returns'],['WhatsApp',     'https://wa.me/923001234567'],['FAQ',         '/faq']] },
 ];
