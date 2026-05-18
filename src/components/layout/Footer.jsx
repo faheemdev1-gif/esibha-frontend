@@ -78,7 +78,7 @@ export default function Footer() {
           padding: 'var(--s4) var(--s7)',
           display: 'flex', justifyContent: 'space-between', alignItems: 'center',
         }}>
-          <span style={{ fontSize: '11px', color: 'var(--text-muted)' }}>© 2024 eSibha. All rights reserved.</span>
+          <span style={{ fontSize: '11px', color: 'var(--text-muted)' }}>© 2026 eSibha. All rights reserved.</span>
           <span style={{ fontSize: '11px', color: 'var(--text-muted)', letterSpacing: '0.06em' }}>Pakistan · UAE · UK</span>
         </div>
       </div>
