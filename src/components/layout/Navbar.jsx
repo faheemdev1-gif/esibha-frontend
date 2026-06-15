@@ -33,11 +33,8 @@ export default function Navbar() {
 
   return (
     <>
-      <nav style={{
+      <nav className="site-nav" style={{
         position: 'fixed', top: 0, left: 0, right: 0, zIndex: 200,
-        height: 'var(--nav-h)',
-        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-        padding: '0 var(--s7)',
         background: scrolled ? 'rgba(247,247,248,0.94)' : 'var(--bg-white)',
         backdropFilter: scrolled ? 'blur(16px)' : 'none',
         borderBottom: `1px solid ${scrolled ? 'var(--border)' : 'var(--border-soft)'}`,
@@ -50,11 +47,11 @@ export default function Navbar() {
           color: 'var(--text-primary)', letterSpacing: '0.18em',
           textDecoration: 'none', flexShrink: 0,
         }}>
-          eSibha
+          <img src="/logo.png" alt="eSibha" width={160}/>
         </Link>
 
-        {/* Centre links */}
-        <div style={{ display: 'flex', gap: '36px', alignItems: 'center' }}>
+  {/* Centre links */}
+  <div className="nav-center">
           {/* Shop with dropdown */}
           <div
             style={{ position: 'relative' }}
@@ -96,8 +93,8 @@ export default function Navbar() {
           ))}
         </div>
 
-        {/* Right icons */}
-        <div style={{ display: 'flex', gap: '20px', alignItems: 'center' }}>
+  {/* Right icons */}
+  <div className="nav-right">
           <Link to="/account" style={iconBtnStyle} title="Account"><UserIcon size={18} /></Link>
           <button onClick={toggleCart} style={{ ...iconBtnStyle, position: 'relative' }} title="Cart">
             <BagIcon size={18} />

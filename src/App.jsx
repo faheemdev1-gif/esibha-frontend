@@ -19,6 +19,9 @@ import AboutPage          from './pages/AboutPage';
 import ContactPage        from './pages/ContactPage';
 import CartPage           from './pages/CartPage';
 import NotFoundPage       from './pages/NotFoundPage';
+import CheckoutPage from './pages/CheckoutPage';
+
+import OrderSuccessPage from './pages/OrderSuccessPage';
 
 // Scroll to top on route change
 function ScrollToTop() {
@@ -41,7 +44,8 @@ function Layout() {
           <Route path="/shop"              element={<ShopPage />} />
           <Route path="/shop/:category"    element={<ShopPage />} />
           <Route path="/product/:slug"     element={<ProductDetailPage />} />
-
+          <Route path="/checkout" element={<CheckoutPage />} />
+          <Route path="/order-success" element={<OrderSuccessPage />} />
           {/* Features */}
           <Route path="/finder"            element={<FragranceFinderPage />} />
           <Route path="/lab"               element={<CustomLabPage />} />

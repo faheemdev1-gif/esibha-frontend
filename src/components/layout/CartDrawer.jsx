@@ -2,8 +2,12 @@ import { useCartStore, useUIStore } from '../../store';
 import { CloseIcon } from '../ui/Icons';
 import Button from '../ui/Button';
 import BottleSVG from '../ui/BottleSVG';
+import { useNavigate } from 'react-router-dom';
+
 
 export default function CartDrawer() {
+    const navigate = useNavigate();
+
   const { cartOpen, closeCart } = useUIStore();
   const { items, removeItem, updateQty } = useCartStore();
   const subtotal = items.reduce((s, i) => s + i.price * i.qty, 0);
@@ -101,7 +105,16 @@ export default function CartDrawer() {
                 Add PKR {(3000 - subtotal).toLocaleString()} for free shipping
               </p>
             )}
-            <Button fullWidth>Proceed to Checkout</Button>
+            <Button
+  fullWidth
+  size="lg"
+  onClick={() => {
+    closeCart();
+    navigate('/checkout');
+  }}
+>
+  Proceed to Checkout
+</Button>
           </div>
         )}
       </div>

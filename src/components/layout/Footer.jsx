@@ -11,7 +11,7 @@ export default function Footer() {
     <footer style={{ background: 'var(--bg-white)', borderTop: '1px solid var(--border)' }}>
       {/* Main grid */}
       <div className="container" style={{ padding: 'var(--s9) var(--s7) var(--s7)' }}>
-        <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr 1fr', gap: 'var(--s9)' }}>
+  <div className="footer-grid">
           {/* Brand column */}
           <div>
             <div style={{ fontFamily: 'var(--serif)', fontSize: '26px', fontWeight: 300, letterSpacing: '0.14em', color: 'var(--text-primary)', marginBottom: '14px' }}>
@@ -21,11 +21,11 @@ export default function Footer() {
               A luxury fragrance house creating designer-inspired perfumes for the discerning few.
             </p>
             {/* Newsletter */}
-            <div style={{ display: 'flex', gap: '0' }}>
+            <div style={{ display: 'flex', gap: '0', flexWrap: 'wrap' }}>
               <input
                 type="email" placeholder="Your email"
                 style={{
-                  flex: 1, padding: '10px 14px',
+                  flex: '1 1 220px', minWidth: 0, padding: '10px 14px',
                   border: '1px solid var(--border)', borderRight: 'none',
                   borderRadius: '2px 0 0 2px',
                   fontSize: '12px', fontFamily: 'var(--sans)',
@@ -39,6 +39,7 @@ export default function Footer() {
                 fontSize: '10px', letterSpacing: '0.14em', textTransform: 'uppercase',
                 cursor: 'pointer', fontFamily: 'var(--sans)',
                 transition: 'background var(--fast)',
+                flex: '0 0 auto'
               }}
                 onMouseEnter={e => e.currentTarget.style.background = 'var(--accent)'}
                 onMouseLeave={e => e.currentTarget.style.background = 'var(--text-primary)'}
@@ -74,9 +75,8 @@ export default function Footer() {
 
       {/* Bottom bar */}
       <div style={{ borderTop: '1px solid var(--border)' }}>
-        <div className="container" style={{
+        <div className="container footer-bottom" style={{
           padding: 'var(--s4) var(--s7)',
-          display: 'flex', justifyContent: 'space-between', alignItems: 'center',
         }}>
           <span style={{ fontSize: '11px', color: 'var(--text-muted)' }}>© 2026 eSibha. All rights reserved.</span>
           <span style={{ fontSize: '11px', color: 'var(--text-muted)', letterSpacing: '0.06em' }}>Pakistan · UAE · UK</span>

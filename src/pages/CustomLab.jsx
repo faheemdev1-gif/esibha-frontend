@@ -73,13 +73,13 @@ export default function CustomLabPage() {
         </div>
       </div>
 
-      <div style={{ maxWidth: '860px', margin: '0 auto', padding: 'var(--s8) var(--s7)' }}>
+  <div className="container" style={{ padding: 'var(--s8) 0' }}>
 
         {/* ── STEP 1: Build ─────────────────────────────────── */}
         {step === 1 && (
           <div className="fade-in">
             {/* Fragrance pyramid visual */}
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 'var(--s5)', marginBottom: 'var(--s7)' }}>
+            <div className="grid-cols-3" style={{ marginBottom: 'var(--s7)' }}>
               {[
                 { layer: 'top',   label: 'Top Notes',   sub: `Choose up to ${MAX.top}`, hint: 'First impression · 15–30 min' },
                 { layer: 'heart', label: 'Heart Notes',  sub: `Choose up to ${MAX.heart}`, hint: 'The soul · 30 min–4 hrs' },
@@ -129,7 +129,8 @@ export default function CustomLabPage() {
               </div>
             )}
 
-            <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+            <div className="form-actions" style={{ justifyContent: 'flex-end' }}>
+              <div />
               <Button onClick={() => setStep(2)} disabled={!canProceed} size="lg">
                 Next: Name Your Scent →
               </Button>
@@ -151,7 +152,7 @@ export default function CustomLabPage() {
 
             <div style={{ marginBottom: 'var(--s6)' }}>
               <div style={{ fontSize: '10px', letterSpacing: '0.16em', textTransform: 'uppercase', color: 'var(--text-muted)', marginBottom: 'var(--s3)' }}>Choose Size</div>
-              <div style={{ display: 'flex', gap: 'var(--s3)' }}>
+              <div style={{ display: 'flex', gap: 'var(--s3)', flexWrap: 'wrap' }}>
                 {SIZES.map(s => (
                   <button key={s.label} onClick={() => setSize(s.label)} style={{
                     flex: 1, padding: 'var(--s4)',
@@ -176,7 +177,7 @@ export default function CustomLabPage() {
               value={contact.notes} onChange={e => setContact(c => ({ ...c, notes: e.target.value }))}
               placeholder="Anything specific about strength, longevity, occasion..." />
 
-            <div style={{ display: 'flex', gap: 'var(--s3)', justifyContent: 'space-between' }}>
+            <div className="form-actions" style={{ marginTop: 'var(--s4)' }}>
               <Button variant="secondary" onClick={() => setStep(1)}>← Back</Button>
               <Button onClick={() => setStep(3)} disabled={!name || !contact.name || !contact.phone} size="lg">
                 Review Order →
@@ -193,8 +194,8 @@ export default function CustomLabPage() {
             <div style={{ border: '1px solid var(--border)', borderRadius: '2px', padding: 'var(--s5)', marginBottom: 'var(--s5)', background: 'var(--bg)' }}>
               <div style={{ fontFamily: 'var(--serif)', fontSize: '20px', marginBottom: 'var(--s4)', color: 'var(--text-primary)' }}>"{name}"</div>
               {[['Top Notes', selected.top], ['Heart Notes', selected.heart], ['Base Notes', selected.base]].map(([label, notes]) => (
-                <div key={label} style={{ display: 'flex', gap: 'var(--s3)', marginBottom: 'var(--s2)', fontSize: '13px' }}>
-                  <span style={{ color: 'var(--text-muted)', minWidth: '90px', fontWeight: 300 }}>{label}</span>
+                <div key={label} className="row-between" style={{ gap: 'var(--s3)', marginBottom: 'var(--s2)', fontSize: '13px' }}>
+                  <span className="label-col" style={{ color: 'var(--text-muted)', fontWeight: 300 }}>{label}</span>
                   <span style={{ color: 'var(--text-secondary)' }}>{notes.join(', ')}</span>
                 </div>
               ))}

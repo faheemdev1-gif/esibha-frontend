@@ -103,7 +103,7 @@ export default function ShopPage() {
 
       {/* Body */}
       <div className="container" style={{ padding: 'var(--s7)' }}>
-        <div style={{ display: 'grid', gridTemplateColumns: '220px 1fr', gap: 'var(--s7)', alignItems: 'start' }}>
+        <div className="shop-layout">
           <ShopFilters filters={filters} onChange={setFilters} />
           <div>
             {products.length === 0 ? (
@@ -111,8 +111,8 @@ export default function ShopPage() {
                 <p style={{ fontFamily: 'var(--serif)', fontSize: '26px', color: 'var(--text-muted)', marginBottom: 'var(--s3)' }}>No results</p>
                 <p style={{ fontSize: '13px', color: 'var(--text-muted)' }}>Try adjusting your filters.</p>
               </div>
-            ) : (
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 'var(--s5)' }}>
+              ) : (
+              <div className="product-grid">
                 {products.map(p => <ProductCard key={p.id} product={p} />)}
               </div>
             )}

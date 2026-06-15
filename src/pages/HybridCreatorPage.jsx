@@ -33,10 +33,10 @@ export default function HybridCreatorPage() {
         </p>
       </div>
 
-      <div style={{ maxWidth: '900px', margin: '0 auto', padding: 'var(--s8) var(--s7)' }}>
+  <div className="container" style={{ padding: 'var(--s8) 0' }}>
 
         {/* ── Scent Selectors ────────────────────────────────── */}
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr auto 1fr', gap: 'var(--s5)', alignItems: 'start', marginBottom: 'var(--s7)' }}>
+        <div className="three-area" style={{ marginBottom: 'var(--s7)' }}>
           <ScentSlot label="Scent A" scent={scentA} onPick={() => setPicking('A')} onClear={() => setScentA(null)} ratio={ratio} side="A" />
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', paddingTop: '80px' }}>
             <div style={{ fontFamily: 'var(--serif)', fontSize: '28px', color: 'var(--text-muted)', opacity: 0.4 }}>×</div>
@@ -50,7 +50,7 @@ export default function HybridCreatorPage() {
             <div style={{ fontSize: '10px', letterSpacing: '0.18em', textTransform: 'uppercase', color: 'var(--text-muted)', marginBottom: 'var(--s4)', textAlign: 'center' }}>
               Blend Ratio
             </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--s4)', marginBottom: 'var(--s3)' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--s4)', marginBottom: 'var(--s3)', flexWrap: 'wrap' }}>
               <span style={{ fontSize: '12px', color: 'var(--accent)', minWidth: '70px', textAlign: 'right', fontWeight: 500 }}>{scentA.name} {ratio}%</span>
               <input type="range" min={10} max={90} step={5} value={ratio}
                 onChange={e => setRatio(Number(e.target.value))}
@@ -73,7 +73,7 @@ export default function HybridCreatorPage() {
 
             <div style={{ marginBottom: 'var(--s5)' }}>
               <div style={{ fontSize: '10px', letterSpacing: '0.16em', textTransform: 'uppercase', color: 'var(--text-muted)', marginBottom: 'var(--s3)' }}>Choose Size</div>
-              <div style={{ display: 'flex', gap: 'var(--s3)' }}>
+              <div style={{ display: 'flex', gap: 'var(--s3)', flexWrap: 'wrap' }}>
                 {sizes.map(s => (
                   <button key={s.label} onClick={() => setSize(s.label)} style={{
                     flex: 1, padding: 'var(--s3)',
@@ -90,7 +90,7 @@ export default function HybridCreatorPage() {
               </div>
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'var(--s4)' }}>
+            <div className="grid-cols-2" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'var(--s4)' }}>
               <FormField label="Your Name" name="cname" value={contact.name}
                 onChange={e => setContact(c => ({ ...c, name: e.target.value }))} placeholder="Full name" required />
               <FormField label="WhatsApp" name="phone" type="tel" value={contact.phone}
@@ -115,12 +115,12 @@ export default function HybridCreatorPage() {
         {picking && (
           <div style={{ position: 'fixed', inset: 0, zIndex: 400, background: 'rgba(17,19,24,0.4)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 'var(--s5)' }}
             onClick={() => setPicking(null)}>
-            <div style={{ background: 'var(--bg-white)', border: '1px solid var(--border)', borderRadius: '2px', padding: 'var(--s6)', maxWidth: '700px', width: '100%', maxHeight: '80vh', overflowY: 'auto', boxShadow: 'var(--shadow-lg)' }}
+              <div style={{ background: 'var(--bg-white)', border: '1px solid var(--border)', borderRadius: '2px', padding: 'var(--s6)', maxWidth: '700px', width: '100%', maxHeight: '80vh', overflowY: 'auto', boxShadow: 'var(--shadow-lg)' }}
               onClick={e => e.stopPropagation()}>
               <div style={{ fontFamily: 'var(--serif)', fontSize: '22px', fontWeight: 300, marginBottom: 'var(--s5)' }}>
                 Select Scent {picking}
               </div>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 'var(--s4)' }}>
+              <div className="picker-grid">
                 {PRODUCTS.map(p => {
                   const isOther = (picking === 'A' ? scentB : scentA)?.id === p.id;
                   return (

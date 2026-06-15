@@ -84,7 +84,7 @@ export default function HomePage() {
       <section style={{ padding: 'var(--s9) 0', background: 'var(--bg)' }}>
         <div className="container">
           <SectionHeader eyebrow="Curated Moods" title="Discover by Feeling" linkTo="/shop" linkLabel="View All" />
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: 'var(--s4)' }}>
+          <div className="grid-cols-5">
             {MOODS.map(m => (
               <MoodCard key={m.label} mood={m} onClick={() => navigate(`/shop?mood=${m.label.toLowerCase()}`)} />
             ))}
@@ -96,7 +96,7 @@ export default function HomePage() {
       <section style={{ padding: 'var(--s9) 0', background: 'var(--bg-white)', borderTop: '1px solid var(--border)', borderBottom: '1px solid var(--border)' }}>
         <div className="container">
           <SectionHeader eyebrow="Bestsellers" title="Most Loved" linkTo="/shop" linkLabel="View All" />
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 'var(--s5)' }}>
+          <div className="grid-cols-4">
             {bestsellers.map(p => <ProductCard key={p.id} product={p} />)}
           </div>
         </div>
@@ -105,8 +105,7 @@ export default function HomePage() {
       {/* ── FRAGRANCE FINDER TEASER ──────────────────────────── */}
       <section style={{ padding: 'var(--s10) 0', background: 'var(--bg)' }}>
         <div className="container">
-          <div style={{
-            display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'var(--s9)',
+          <div className="two-col" style={{
             alignItems: 'center',
             border: '1px solid var(--border)', borderRadius: '2px',
             padding: 'var(--s9)',
@@ -147,7 +146,7 @@ export default function HomePage() {
       <section style={{ padding: 'var(--s9) 0', background: 'var(--bg-accent)', borderTop: '1px solid var(--border)' }}>
         <div className="container">
           <SectionHeader eyebrow="Client Stories" title="What They Say" />
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 'var(--s5)' }}>
+          <div className="grid-cols-4">
             {TESTIMONIALS.map((t, i) => (
               <div key={i} style={{
                 background: 'var(--bg-white)',
@@ -171,7 +170,7 @@ export default function HomePage() {
       <section style={{ padding: 'var(--s9) 0', background: 'var(--bg-white)', borderTop: '1px solid var(--border)' }}>
         <div className="container">
           <SectionHeader eyebrow="Journal" title="Stories & Craft" linkTo="/journal" linkLabel="All Posts" />
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 'var(--s5)' }}>
+          <div className="grid-cols-3">
             {JOURNAL_POSTS.slice(0, 3).map(post => (
               <div key={post.id} style={{
                 border: '1px solid var(--border)', borderRadius: '2px', padding: 'var(--s6)',

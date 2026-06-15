@@ -119,7 +119,7 @@ export default function CartPage() {
               </span>
             </div>
 
-            <Button fullWidth size="lg">Proceed to Checkout</Button>
+            <Button fullWidth size="lg" onClick={() => navigate('/checkout')}> Proceed to Checkout </Button>
 
             <div style={{ marginTop: 'var(--s4)', display: 'flex', flexDirection: 'column', gap: 'var(--s2)' }}>
               {['Secure checkout', 'Free returns within 30 days', 'Cash on delivery available'].map(t => (
