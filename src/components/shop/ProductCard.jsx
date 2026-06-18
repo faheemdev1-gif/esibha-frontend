@@ -47,7 +47,19 @@ export default function ProductCard({ product }) {
         transition: 'transform var(--slow) var(--ease)',
         marginBottom: '18px',
       }}>
-        <BottleSVG family={product.family} size={90} />
+        {product.image ? (
+          <img
+            src={product.image}
+            alt={product.name}
+            style={{
+              width: '120px',
+              height: '120px',
+              objectFit: 'contain',
+            }}
+          />
+        ) : (
+          <BottleSVG family={product.family} size={90} />
+        )}
       </div>
 
       <FamilyTag family={product.family} />

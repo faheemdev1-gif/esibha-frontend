@@ -1,16 +1,18 @@
-import { useState } from 'react';
+
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { PRODUCTS, JOURNAL_POSTS } from '../data/seed';
+import { JOURNAL_POSTS } from '../data/seed';
 import ProductCard from '../components/shop/ProductCard';
 import Button from '../components/ui/Button';
 import { ArrowRight } from '../components/ui/Icons';
+import api from '../api/api';
 
 const MOODS = [
-  { label: 'Fresh',    sub: 'Citrus & Aquatic', symbol: '◈' },
-  { label: 'Romantic', sub: 'Floral & Soft',    symbol: '◇' },
-  { label: 'Bold',     sub: 'Oud & Intense',    symbol: '◆' },
-  { label: 'Luxury',   sub: 'Rich & Rare',      symbol: '◉' },
-  { label: 'Night',    sub: 'Dark & Musk',      symbol: '◐' },
+  { label: 'Fresh', sub: 'Citrus & Aquatic', symbol: '◈' },
+  { label: 'Romantic', sub: 'Floral & Soft', symbol: '◇' },
+  { label: 'Bold', sub: 'Oud & Intense', symbol: '◆' },
+  { label: 'Luxury', sub: 'Rich & Rare', symbol: '◉' },
+  { label: 'Night', sub: 'Dark & Musk', symbol: '◐' },
 ];
 
 const TESTIMONIALS = [
@@ -21,13 +23,44 @@ const TESTIMONIALS = [
 ];
 
 export default function HomePage() {
-  const navigate  = useNavigate();
-  const bestsellers = PRODUCTS.filter(p => p.bestseller);
-  const featured    = PRODUCTS.filter(p => p.featured).slice(0, 3);
+  const navigate = useNavigate();
+
+  const [products, setProducts] = useState([]);
+  const [loadingProducts, setLoadingProducts] = useState(true);
+
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        const res = await api.get('/products');
+        setProducts(res.data.data || []);
+      } catch (error) {
+        console.error('Failed to fetch homepage products:', error);
+      } finally {
+        setLoadingProducts(false);
+      }
+    };
+
+    fetchProducts();
+  }, []);
+
+  const bestsellers = products
+    .filter(p => p.bestseller || p.mostLoved)
+    .slice(0, 4);
+
+  const fallbackBestsellers = products.slice(0, 4);
+
+  const displayBestsellers =
+    bestsellers.length > 0 ? bestsellers : fallbackBestsellers;
+
+  const featured = products
+    .filter(p => p.featured || p.newArrival)
+    .slice(0, 3);
+
+  const displayFeatured =
+    featured.length > 0 ? featured : products.slice(0, 3);
 
   return (
     <div style={{ paddingTop: 'var(--nav-h)' }}>
-
       {/* ── HERO ─────────────────────────────────────────────── */}
       <section style={{
         minHeight: '92vh',
@@ -39,7 +72,6 @@ export default function HomePage() {
         position: 'relative',
         borderBottom: '1px solid var(--border)',
       }}>
-        {/* Decorative top line */}
         <div style={{ position: 'absolute', top: 0, left: '50%', transform: 'translateX(-50%)', width: '1px', height: '80px', background: 'linear-gradient(to bottom, transparent, var(--border))' }} />
 
         <p className="fade-up d1 section-eyebrow">Luxury Fragrance House · Pakistan</p>
@@ -70,7 +102,6 @@ export default function HomePage() {
           <Button size="lg" variant="ghost" onClick={() => navigate('/finder')}>Find Your Fragrance</Button>
         </div>
 
-        {/* Scroll indicator */}
         <div className="fade-up d5" style={{
           position: 'absolute', bottom: '32px',
           display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px',
@@ -86,7 +117,11 @@ export default function HomePage() {
           <SectionHeader eyebrow="Curated Moods" title="Discover by Feeling" linkTo="/shop" linkLabel="View All" />
           <div className="grid-cols-5">
             {MOODS.map(m => (
-              <MoodCard key={m.label} mood={m} onClick={() => navigate(`/shop?mood=${m.label.toLowerCase()}`)} />
+              <MoodCard
+                key={m.label}
+                mood={m}
+                onClick={() => navigate(`/shop?mood=${m.label}`)}
+              />
             ))}
           </div>
         </div>
@@ -96,9 +131,18 @@ export default function HomePage() {
       <section style={{ padding: 'var(--s9) 0', background: 'var(--bg-white)', borderTop: '1px solid var(--border)', borderBottom: '1px solid var(--border)' }}>
         <div className="container">
           <SectionHeader eyebrow="Bestsellers" title="Most Loved" linkTo="/shop" linkLabel="View All" />
-          <div className="grid-cols-4">
-            {bestsellers.map(p => <ProductCard key={p.id} product={p} />)}
-          </div>
+
+          {loadingProducts ? (
+            <p style={{ fontSize: '13px', color: 'var(--text-muted)' }}>Loading products...</p>
+          ) : displayBestsellers.length === 0 ? (
+            <p style={{ fontSize: '13px', color: 'var(--text-muted)' }}>No products found.</p>
+          ) : (
+            <div className="grid-cols-4">
+              {displayBestsellers.map(p => (
+                <ProductCard key={p._id} product={p} />
+              ))}
+            </div>
+          )}
         </div>
       </section>
 
@@ -125,16 +169,28 @@ export default function HomePage() {
                 Try the Finder <ArrowRight size={14} />
               </Button>
             </div>
+
             <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'flex-end', gap: 'var(--s5)' }}>
-              {featured.map((p, i) => (
-                <div key={p.id} style={{ transform: i === 1 ? 'translateY(-16px)' : 'none', opacity: i === 1 ? 1 : 0.7 }}>
-                  {/* Inline minimal bottle for teaser */}
-                  <svg width={i===1?110:85} height={i===1?160:123} viewBox="0 0 100 145" fill="none">
-                    <rect x="34" y="6" width="32" height="10" rx="3" fill="var(--accent)" opacity="0.3"/>
-                    <rect x="6"  y="16" width="88" height="122" rx="10" fill="var(--bg-subtle)" stroke="var(--border)" strokeWidth="0.8"/>
-                    <rect x="14" y="30" width="72" height="92" rx="6" fill="var(--bg-white)"/>
-                    <text x="50" y="80" textAnchor="middle" fontFamily="Georgia,serif" fontSize="8" fill="var(--accent)" opacity="0.8" letterSpacing="2">eSibha</text>
-                  </svg>
+              {displayFeatured.map((p, i) => (
+                <div key={p._id} style={{ transform: i === 1 ? 'translateY(-16px)' : 'none', opacity: i === 1 ? 1 : 0.7 }}>
+                  {p.image ? (
+                    <img
+                      src={p.image}
+                      alt={p.name}
+                      style={{
+                        width: i === 1 ? '130px' : '100px',
+                        height: i === 1 ? '170px' : '135px',
+                        objectFit: 'contain',
+                      }}
+                    />
+                  ) : (
+                    <svg width={i === 1 ? 110 : 85} height={i === 1 ? 160 : 123} viewBox="0 0 100 145" fill="none">
+                      <rect x="34" y="6" width="32" height="10" rx="3" fill="var(--accent)" opacity="0.3" />
+                      <rect x="6" y="16" width="88" height="122" rx="10" fill="var(--bg-subtle)" stroke="var(--border)" strokeWidth="0.8" />
+                      <rect x="14" y="30" width="72" height="92" rx="6" fill="var(--bg-white)" />
+                      <text x="50" y="80" textAnchor="middle" fontFamily="Georgia,serif" fontSize="8" fill="var(--accent)" opacity="0.8" letterSpacing="2">eSibha</text>
+                    </svg>
+                  )}
                 </div>
               ))}
             </div>
@@ -190,28 +246,30 @@ export default function HomePage() {
           </div>
         </div>
       </section>
-
     </div>
   );
 }
 
-// ── LOCAL COMPONENTS ───────────────────────────────────────────────
 function SectionHeader({ eyebrow, title, linkTo, linkLabel }) {
   const navigate = useNavigate();
+
   return (
     <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', marginBottom: 'var(--s7)' }}>
       <div>
         <p className="section-eyebrow">{eyebrow}</p>
         <h2 className="section-title">{title}</h2>
       </div>
+
       {linkTo && (
-        <button onClick={() => navigate(linkTo)} style={{
-          background: 'none', border: 'none', cursor: 'pointer',
-          display: 'flex', alignItems: 'center', gap: '6px',
-          fontSize: '11px', letterSpacing: '0.14em', textTransform: 'uppercase',
-          color: 'var(--text-muted)',
-          transition: 'color var(--fast)',
-        }}
+        <button
+          onClick={() => navigate(linkTo)}
+          style={{
+            background: 'none', border: 'none', cursor: 'pointer',
+            display: 'flex', alignItems: 'center', gap: '6px',
+            fontSize: '11px', letterSpacing: '0.14em', textTransform: 'uppercase',
+            color: 'var(--text-muted)',
+            transition: 'color var(--fast)',
+          }}
           onMouseEnter={e => e.currentTarget.style.color = 'var(--accent)'}
           onMouseLeave={e => e.currentTarget.style.color = 'var(--text-muted)'}
         >
@@ -224,6 +282,7 @@ function SectionHeader({ eyebrow, title, linkTo, linkLabel }) {
 
 function MoodCard({ mood, onClick }) {
   const [hov, setHov] = useState(false);
+
   return (
     <button
       onClick={onClick}

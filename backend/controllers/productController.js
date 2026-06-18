@@ -39,20 +39,17 @@ exports.getProducts = async (req, res) => {
       };
 
       const range = intensityMap[intensity];
-
-      if (range) {
-        query.intensity = { $gte: range[0], $lt: range[1] };
-      }
+      if (range) query.intensity = { $gte: range[0], $lt: range[1] };
     }
 
     let productsQuery = Product.find(query);
 
     switch (sort) {
       case "price-asc":
-        productsQuery = productsQuery.sort({ "sizes.1.price": 1 });
+        productsQuery = productsQuery.sort({ "sizes.0.price": 1 });
         break;
       case "price-desc":
-        productsQuery = productsQuery.sort({ "sizes.1.price": -1 });
+        productsQuery = productsQuery.sort({ "sizes.0.price": -1 });
         break;
       case "new":
         productsQuery = productsQuery.sort({ createdAt: -1 });
@@ -104,16 +101,9 @@ exports.getProductBySlug = async (req, res) => {
 exports.createProduct = async (req, res) => {
   try {
     const product = await Product.create(req.body);
-
-    res.status(201).json({
-      success: true,
-      data: product,
-    });
+    res.status(201).json({ success: true, data: product });
   } catch (error) {
-    res.status(400).json({
-      success: false,
-      message: error.message,
-    });
+    res.status(400).json({ success: false, message: error.message });
   }
 };
 
@@ -132,15 +122,9 @@ exports.updateProduct = async (req, res) => {
       });
     }
 
-    res.status(200).json({
-      success: true,
-      data: product,
-    });
+    res.status(200).json({ success: true, data: product });
   } catch (error) {
-    res.status(400).json({
-      success: false,
-      message: error.message,
-    });
+    res.status(400).json({ success: false, message: error.message });
   }
 };
 
@@ -161,9 +145,6 @@ exports.deleteProduct = async (req, res) => {
       message: "Product deleted",
     });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: error.message,
-    });
+    res.status(500).json({ success: false, message: error.message });
   }
 };
