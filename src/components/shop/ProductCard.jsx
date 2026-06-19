@@ -112,7 +112,7 @@ export default function ProductCard({ product }) {
           textAlign: 'center',
         }}
       >
-        Inspired by {product.inspo}
+        {/* Inspired by {product.inspo} */}
       </p>
 
       <div
