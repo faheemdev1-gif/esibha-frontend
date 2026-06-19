@@ -176,7 +176,7 @@ export default function CheckoutPage() {
                   value={promoCode}
                   onChange={e => setPromoCode(e.target.value.toUpperCase())}
                   disabled={!!coupon}
-                  placeholder="ESIBHA10"
+                  placeholder="Enter promo code"
                   style={{ ...inputStyle, marginBottom: 0 }}
                 />
 
