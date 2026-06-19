@@ -1,17 +1,24 @@
-
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useCartStore } from '../store';
 import Button from '../components/ui/Button';
 import { ArrowLeft } from '../components/ui/Icons';
 import api from '../api/api';
+
 export default function CheckoutPage() {
   const navigate = useNavigate();
   const { items, clearCart } = useCartStore();
 
   const subtotal = items.reduce((s, i) => s + i.price * i.qty, 0);
   const shipping = subtotal >= 3000 ? 0 : 200;
-  const total = subtotal + shipping;
+
+  const [promoCode, setPromoCode] = useState('');
+  const [coupon, setCoupon] = useState(null);
+  const [couponMessage, setCouponMessage] = useState('');
+  const [couponLoading, setCouponLoading] = useState(false);
+
+  const discount = coupon?.discount || 0;
+  const total = Math.max(0, subtotal + shipping - discount);
 
   const [form, setForm] = useState({
     fullName: '',
@@ -26,7 +33,39 @@ export default function CheckoutPage() {
   const handleChange = e => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
-const handleSubmit = async e => {
+
+  const applyCoupon = async () => {
+    if (!promoCode.trim()) {
+      setCouponMessage('Please enter a promo code.');
+      return;
+    }
+
+    try {
+      setCouponLoading(true);
+      setCouponMessage('');
+
+      const res = await api.post('/coupons/validate', {
+        code: promoCode,
+        subtotal,
+      });
+
+      setCoupon(res.data.data);
+      setCouponMessage(`Promo code applied: PKR ${res.data.data.discount.toLocaleString()} off`);
+    } catch (error) {
+      setCoupon(null);
+      setCouponMessage(error.response?.data?.message || 'Invalid promo code');
+    } finally {
+      setCouponLoading(false);
+    }
+  };
+
+  const removeCoupon = () => {
+    setCoupon(null);
+    setPromoCode('');
+    setCouponMessage('');
+  };
+
+  const handleSubmit = async e => {
     e.preventDefault();
 
     const orderData = {
@@ -34,18 +73,28 @@ const handleSubmit = async e => {
       items,
       subtotal,
       shipping,
+      discount,
+      coupon: coupon
+        ? {
+            code: coupon.code,
+            type: coupon.type,
+            value: coupon.value,
+            discount: coupon.discount,
+          }
+        : null,
       total,
+      paymentMethod: form.paymentMethod,
     };
 
-   try {
-  await api.post('/orders', orderData);
+    try {
+      await api.post('/orders', orderData);
 
-  clearCart();
-  navigate('/order-success');
-} catch (error) {
-  console.error(error);
-  alert('Failed to place order. Please try again.');
-}
+      clearCart();
+      navigate('/order-success');
+    } catch (error) {
+      console.error(error);
+      alert('Failed to place order. Please try again.');
+    }
   };
 
   if (items.length === 0) {
@@ -87,14 +136,7 @@ const handleSubmit = async e => {
             <Input label="City" name="city" value={form.city} onChange={handleChange} required />
 
             <label style={labelStyle}>Complete Address</label>
-            <textarea
-              name="address"
-              value={form.address}
-              onChange={handleChange}
-              required
-              rows="4"
-              style={inputStyle}
-            />
+            <textarea name="address" value={form.address} onChange={handleChange} required rows="4" style={inputStyle} />
 
             <label style={labelStyle}>Order Notes</label>
             <textarea
@@ -126,9 +168,50 @@ const handleSubmit = async e => {
               </div>
             ))}
 
+            <div style={{ marginTop: 'var(--s5)', paddingTop: 'var(--s4)', borderTop: '1px solid var(--border)' }}>
+              <label style={labelStyle}>Promo Code</label>
+
+              <div style={{ display: 'flex', gap: '8px' }}>
+                <input
+                  value={promoCode}
+                  onChange={e => setPromoCode(e.target.value.toUpperCase())}
+                  disabled={!!coupon}
+                  placeholder="ESIBHA10"
+                  style={{ ...inputStyle, marginBottom: 0 }}
+                />
+
+                {coupon ? (
+                  <button type="button" onClick={removeCoupon} style={smallButtonStyle}>
+                    Remove
+                  </button>
+                ) : (
+                  <button type="button" onClick={applyCoupon} disabled={couponLoading} style={smallButtonStyle}>
+                    {couponLoading ? '...' : 'Apply'}
+                  </button>
+                )}
+              </div>
+
+              {couponMessage && (
+                <p
+                  style={{
+                    fontSize: '12px',
+                    marginTop: '8px',
+                    color: coupon ? '#286858' : '#b23b3b',
+                  }}
+                >
+                  {couponMessage}
+                </p>
+              )}
+            </div>
+
             <div style={{ borderTop: '1px solid var(--border)', marginTop: 'var(--s4)', paddingTop: 'var(--s4)' }}>
               <Row label="Subtotal" value={`PKR ${subtotal.toLocaleString()}`} />
               <Row label="Shipping" value={shipping === 0 ? 'Free' : `PKR ${shipping}`} />
+
+              {discount > 0 && (
+                <Row label={`Discount ${coupon?.code ? `(${coupon.code})` : ''}`} value={`- PKR ${discount.toLocaleString()}`} />
+              )}
+
               <Row label="Total" value={`PKR ${total.toLocaleString()}`} total />
             </div>
 
@@ -182,3 +265,14 @@ const inputStyle = {
   marginBottom: 'var(--s4)',
 };
 
+const smallButtonStyle = {
+  padding: '0 14px',
+  border: '1px solid var(--accent)',
+  background: 'var(--accent)',
+  color: '#fff',
+  borderRadius: '2px',
+  fontSize: '11px',
+  letterSpacing: '0.08em',
+  textTransform: 'uppercase',
+  cursor: 'pointer',
+};
