@@ -34,20 +34,14 @@ export default function Navbar() {
   return (
     <>
       <nav className="site-nav" style={{
-        position: 'fixed', top: 0, left: 0, right: 0, zIndex: 200,
         background: scrolled ? 'rgba(247,247,248,0.94)' : 'var(--bg-white)',
         backdropFilter: scrolled ? 'blur(16px)' : 'none',
         borderBottom: `1px solid ${scrolled ? 'var(--border)' : 'var(--border-soft)'}`,
-        transition: 'all var(--base) var(--ease)',
       }}>
 
         {/* Logo */}
-        <Link to="/" style={{
-          fontFamily: 'var(--serif)', fontSize: '22px', fontWeight: 300,
-          color: 'var(--text-primary)', letterSpacing: '0.18em',
-          textDecoration: 'none', flexShrink: 0,
-        }}>
-          <img src="/logo.png" alt="eSibha" width={160}/>
+        <Link to="/" className="nav-logo">
+          <img src="/logo.png" alt="eSibha" />
         </Link>
 
   {/* Centre links */}
@@ -95,7 +89,7 @@ export default function Navbar() {
 
   {/* Right icons */}
   <div className="nav-right">
-          <Link to="/account" style={iconBtnStyle} title="Account"><UserIcon size={18} /></Link>
+          <Link to="/account" className="nav-account" style={iconBtnStyle} title="Account"><UserIcon size={18} /></Link>
           <button onClick={toggleCart} style={{ ...iconBtnStyle, position: 'relative' }} title="Cart">
             <BagIcon size={18} />
             {totalItems > 0 && (

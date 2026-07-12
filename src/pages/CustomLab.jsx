@@ -45,7 +45,7 @@ export default function CustomLabPage() {
         </p>
 
         {/* Step indicator */}
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 'var(--s3)', marginTop: 'var(--s6)' }}>
+        <div className="step-indicator">
           {['Build Your Blend', 'Name & Size', 'Confirm'].map((s, i) => {
             const idx = i + 1;
             const active = step === idx;

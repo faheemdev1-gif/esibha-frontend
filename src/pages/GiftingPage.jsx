@@ -43,7 +43,7 @@ export default function GiftingPage() {
           <p className="section-eyebrow">Curated Sets</p>
           <h2 className="section-title" style={{ marginBottom: 'var(--s7)' }}>Choose Your Set</h2>
 
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 'var(--s5)' }}>
+          <div className="grid-cols-3">
             {GIFT_PACKS.map(pack => (
               <div key={pack.id} style={{
                 background: 'var(--bg-white)', border: '1px solid var(--border)',
@@ -97,7 +97,7 @@ export default function GiftingPage() {
           <p className="section-eyebrow">Presentation</p>
           <h2 className="section-title" style={{ marginBottom: 'var(--s7)' }}>Choose Your Wrapping</h2>
 
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 'var(--s5)' }}>
+          <div className="grid-cols-3">
             {WRAP_OPTIONS.map(w => (
               <button key={w.id} onClick={() => setSelectedWrap(w.id)} style={{
                 background: 'var(--bg-white)',

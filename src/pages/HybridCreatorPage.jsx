@@ -102,7 +102,7 @@ export default function HybridCreatorPage() {
       <div className="container" style={{ padding: 'var(--s8) 0' }}>
         <div className="three-area" style={{ marginBottom: 'var(--s7)' }}>
           <ScentSlot label="Scent A" scent={scentA} onPick={() => setPicking('A')} onClear={() => setScentA(null)} ratio={ratio} />
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', paddingTop: '80px' }}>
+          <div className="hybrid-separator">
             <div style={{ fontFamily: 'var(--serif)', fontSize: '28px', color: 'var(--text-muted)', opacity: 0.4 }}>×</div>
           </div>
           <ScentSlot label="Scent B" scent={scentB} onPick={() => setPicking('B')} onClear={() => setScentB(null)} ratio={100 - ratio} />

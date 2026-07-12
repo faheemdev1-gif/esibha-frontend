@@ -38,7 +38,7 @@ export default function AboutPage() {
     <div style={{ paddingTop: 'var(--nav-h)', background: 'var(--bg)' }}>
 
       {/* ── Hero ──────────────────────────────────────────── */}
-      <div style={{ background: 'var(--bg-white)', borderBottom: '1px solid var(--border)', padding: 'var(--s10) var(--s7)', textAlign: 'center' }}>
+      <div className="page-header-lg" style={{ background: 'var(--bg-white)', borderBottom: '1px solid var(--border)', textAlign: 'center' }}>
         <p className="fade-up d1 section-eyebrow" style={{ textAlign: 'center' }}>Our Story</p>
         <h1 className="fade-up d2" style={{ fontFamily: 'var(--serif)', fontSize: 'clamp(40px,6vw,80px)', fontWeight: 300, lineHeight: 1.1, color: 'var(--text-primary)', maxWidth: '800px', margin: '0 auto var(--s4)' }}>
           Born from a love<br />
@@ -49,7 +49,7 @@ export default function AboutPage() {
 
       {/* ── Story ─────────────────────────────────────────── */}
       <section style={{ padding: 'var(--s10) 0', background: 'var(--bg-white)', borderBottom: '1px solid var(--border)' }}>
-        <div style={{ maxWidth: '720px', margin: '0 auto', padding: '0 var(--s7)' }}>
+        <div className="page-prose">
           {[
             { text: 'eSibha was founded on a single belief: that the world\'s most extraordinary fragrances should not be reserved for the few.', large: true },
             { text: 'We study the finest creations from Maison Francis Kurkdjian, Tom Ford, Byredo, and Creed — then recreate them with the same raw materials, the same obsessive attention to molecular structure, at a fraction of the price.' },
@@ -74,7 +74,7 @@ export default function AboutPage() {
       {/* ── Stats ─────────────────────────────────────────── */}
       <section style={{ background: 'var(--bg-accent)', borderBottom: '1px solid var(--border)' }}>
         <div className="container" style={{ padding: 'var(--s8) var(--s7)' }}>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '1px', background: 'var(--border)' }}>
+          <div className="stats-grid">
             {STATS.map(({ number, label }) => (
               <div key={label} style={{ background: 'var(--bg-accent)', padding: 'var(--s7)', textAlign: 'center' }}>
                 <div style={{ fontFamily: 'var(--serif)', fontSize: 'clamp(36px,4vw,52px)', fontWeight: 300, color: 'var(--accent)', marginBottom: 'var(--s2)' }}>
@@ -94,7 +94,7 @@ export default function AboutPage() {
         <div className="container" style={{ padding: 'var(--s7)' }}>
           <p className="section-eyebrow" style={{ textAlign: 'center', marginBottom: 'var(--s3)' }}>What We Stand For</p>
           <h2 className="section-title" style={{ textAlign: 'center', marginBottom: 'var(--s8)' }}>Our Values</h2>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 'var(--s5)' }}>
+          <div className="grid-cols-4">
             {VALUES.map(v => (
               <div key={v.title} style={{ borderTop: '2px solid var(--accent)', paddingTop: 'var(--s5)' }}>
                 <div style={{ fontSize: '22px', color: 'var(--accent)', marginBottom: 'var(--s4)', opacity: 0.7 }}>{v.symbol}</div>

@@ -101,13 +101,13 @@ export default function ProductDetailPage() {
           <span style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>{product.name}</span>
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'var(--s9)', alignItems: 'start', background: 'var(--bg-white)', border: '1px solid var(--border)', borderRadius: '2px', padding: 'var(--s9)', marginBottom: 'var(--s9)' }}>
-          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '480px', background: 'var(--bg)', borderRadius: '2px', padding: 'var(--s8)' }}>
+        <div className="product-detail-layout card-pad-lg" style={{ background: 'var(--bg-white)', border: '1px solid var(--border)', borderRadius: '2px', marginBottom: 'var(--s9)' }}>
+          <div className="product-image-panel">
             {product.image ? (
               <img
                 src={product.image}
                 alt={product.name}
-                style={{ width: '320px', height: '320px', objectFit: 'contain' }}
+                className="product-hero-img"
               />
             ) : (
               <BottleSVG family={product.family} size={200} />
@@ -138,7 +138,7 @@ export default function ProductDetailPage() {
               <IntensityBar value={product.intensity} />
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 'var(--s3)', marginBottom: 'var(--s6)' }}>
+            <div className="notes-grid" style={{ marginBottom: 'var(--s6)' }}>
               {[
                 ['Top Notes', product.top || []],
                 ['Heart Notes', product.heart || []],
@@ -187,7 +187,7 @@ export default function ProductDetailPage() {
               </div>
             </div>
 
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 'var(--s5)' }}>
+            <div className="qty-price-row" style={{ marginBottom: 'var(--s5)' }}>
               <div style={{ display: 'flex', alignItems: 'center', border: '1px solid var(--border)', borderRadius: '2px' }}>
                 <button onClick={() => setQty(q => Math.max(1, q - 1))} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', width: '38px', height: '38px', fontSize: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>−</button>
                 <span style={{ width: '36px', textAlign: 'center', fontSize: '14px', color: 'var(--text-primary)' }}>{qty}</span>
@@ -225,7 +225,7 @@ export default function ProductDetailPage() {
             <h2 className="section-title" style={{ marginBottom: 'var(--s7)' }}>
               You Might Also Love
             </h2>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 'var(--s5)' }}>
+            <div className="grid-cols-4">
               {related.map(p => (
                 <ProductCard key={p._id} product={p} />
               ))}

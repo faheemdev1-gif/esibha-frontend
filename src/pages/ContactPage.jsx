@@ -35,7 +35,7 @@ export default function ContactPage() {
       </div>
 
       <div className="container" style={{ padding: 'var(--s8) var(--s7)' }}>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: 'var(--s9)', alignItems: 'start' }}>
+        <div className="contact-layout">
 
           {/* Left — Info */}
           <div>
@@ -86,7 +86,7 @@ export default function ContactPage() {
                   Send a Message
                 </h2>
                 <form onSubmit={handleSubmit}>
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'var(--s4)' }}>
+                  <div className="grid-cols-2">
                     <FormField label="Full Name" name="name" value={form.name}
                       onChange={e => set('name', e.target.value)} placeholder="Your name" required />
                     <FormField label="Email" name="email" type="email" value={form.email}

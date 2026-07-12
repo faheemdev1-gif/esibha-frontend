@@ -124,7 +124,7 @@ export default function CheckoutPage() {
           Checkout
         </h1>
 
-        <form onSubmit={handleSubmit} style={{ display: 'grid', gridTemplateColumns: '1fr 360px', gap: 'var(--s8)', alignItems: 'start' }}>
+        <form onSubmit={handleSubmit} className="sidebar-layout">
           <div style={{ background: 'var(--bg-white)', border: '1px solid var(--border)', padding: 'var(--s6)', borderRadius: '2px' }}>
             <h2 style={{ fontFamily: 'var(--serif)', fontSize: '24px', fontWeight: 300, marginBottom: 'var(--s5)' }}>
               Delivery Details

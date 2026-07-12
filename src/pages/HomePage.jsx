@@ -62,54 +62,181 @@ export default function HomePage() {
   return (
     <div style={{ paddingTop: 'var(--nav-h)' }}>
       {/* ── HERO ─────────────────────────────────────────────── */}
-      <section style={{
-        minHeight: '92vh',
-        display: 'flex', flexDirection: 'column',
-        alignItems: 'center', justifyContent: 'center',
-        textAlign: 'center',
-        padding: 'var(--s10) var(--s7) var(--s9)',
-        background: 'var(--bg-white)',
-        position: 'relative',
-        borderBottom: '1px solid var(--border)',
-      }}>
-        <div style={{ position: 'absolute', top: 0, left: '50%', transform: 'translateX(-50%)', width: '1px', height: '80px', background: 'linear-gradient(to bottom, transparent, var(--border))' }} />
+      {/* ── HERO ─────────────────────────────────────────────── */}
+<section
+  style={{
+    minHeight: '92vh',
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    justifyContent: 'center',
+    textAlign: 'center',
+    padding: 'var(--s10) var(--s7) var(--s9)',
+    position: 'relative',
+    overflow: 'hidden',
+    borderBottom: '1px solid rgba(255,255,255,.08)',
+    background: '#000',
+  }}
+>
+  {/* Background Video */}
+  <video
+    autoPlay
+    muted
+    loop
+    playsInline
+    style={{
+      position: 'absolute',
+      inset: 0,
+      width: '100%',
+      height: '100%',
+      objectFit: 'cover',
+      zIndex: 0,
+    }}
+  >
+    <source src="/video.mp4" type="video/mp4" />
+  </video>
 
-        <p className="fade-up d1 section-eyebrow">Luxury Fragrance House · Pakistan</p>
+  {/* Overlay */}
+  <div
+    style={{
+      position: 'absolute',
+      inset: 0,
+      background:
+        'linear-gradient(to bottom, rgba(0,0,0,.35), rgba(0,0,0,.55), rgba(0,0,0,.75))',
+      zIndex: 1,
+    }}
+  />
 
-        <h1 className="fade-up d2" style={{
-          fontFamily: 'var(--serif)',
-          fontSize: 'clamp(52px, 8vw, 96px)',
-          fontWeight: 300, lineHeight: 1.05,
-          color: 'var(--text-primary)',
-          marginBottom: 'var(--s4)',
-          letterSpacing: '-0.01em',
-        }}>
-          Wear the Feeling,<br />
-          <em style={{ fontStyle: 'italic', color: 'var(--accent)' }}>Not Just the Scent.</em>
-        </h1>
+  {/* Decorative line */}
+  <div
+    style={{
+      position: 'absolute',
+      top: 0,
+      left: '50%',
+      transform: 'translateX(-50%)',
+      width: '1px',
+      height: '80px',
+      background:
+        'linear-gradient(to bottom, transparent, rgba(255,255,255,.4))',
+      zIndex: 2,
+    }}
+  />
 
-        <p className="fade-up d3" style={{
-          fontSize: '15px', fontWeight: 300,
-          color: 'var(--text-secondary)', maxWidth: '400px',
-          lineHeight: 1.75, marginBottom: 'var(--s7)',
-          letterSpacing: '0.02em',
-        }}>
-          Designer-inspired fragrances crafted for those who know exactly what they want.
-        </p>
+  {/* Hero Content */}
+  <div
+    style={{
+      position: 'relative',
+      zIndex: 2,
+      display: 'flex',
+      flexDirection: 'column',
+      alignItems: 'center',
+      maxWidth: '900px',
+    }}
+  >
+    <p
+      className="fade-up d1 section-eyebrow"
+      style={{ color: 'rgba(255,255,255,.75)' }}
+    >
+      Luxury Fragrance House · Pakistan
+    </p>
 
-        <div className="fade-up d4" style={{ display: 'flex', gap: 'var(--s4)', flexWrap: 'wrap', justifyContent: 'center' }}>
-          <Button size="lg" onClick={() => navigate('/shop')}>Shop Collection</Button>
-          <Button size="lg" variant="ghost" onClick={() => navigate('/finder')}>Find Your Fragrance</Button>
-        </div>
+    <h1
+      className="fade-up d2"
+      style={{
+        fontFamily: 'var(--serif)',
+        fontSize: 'clamp(52px, 8vw, 96px)',
+        fontWeight: 300,
+        lineHeight: 1.05,
+        color: '#fff',
+        marginBottom: 'var(--s4)',
+        letterSpacing: '-0.01em',
+      }}
+    >
+      Wear the Feeling,
+      <br />
+      <em
+        style={{
+          fontStyle: 'italic',
+          color: '#d8b26e',
+        }}
+      >
+        Not Just the Scent.
+      </em>
+    </h1>
 
-        <div className="fade-up d5" style={{
-          position: 'absolute', bottom: '32px',
-          display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px',
-        }}>
-          <span style={{ fontSize: '9px', letterSpacing: '0.22em', textTransform: 'uppercase', color: 'var(--text-muted)' }}>Scroll</span>
-          <div style={{ width: '1px', height: '36px', background: 'linear-gradient(to bottom, var(--text-muted), transparent)' }} />
-        </div>
-      </section>
+    <p
+      className="fade-up d3"
+      style={{
+        fontSize: '15px',
+        fontWeight: 300,
+        color: 'rgba(255,255,255,.85)',
+        maxWidth: '450px',
+        lineHeight: 1.75,
+        marginBottom: 'var(--s7)',
+        letterSpacing: '0.02em',
+      }}
+    >
+      Designer-inspired fragrances crafted for those who know exactly what they
+      want.
+    </p>
+
+    <div
+      className="fade-up d4"
+      style={{
+        display: 'flex',
+        gap: 'var(--s4)',
+        flexWrap: 'wrap',
+        justifyContent: 'center',
+      }}
+    >
+      <Button size="lg" onClick={() => navigate('/shop')}>
+        Shop Collection
+      </Button>
+
+      <Button
+        size="lg"
+        variant="ghost"
+        onClick={() => navigate('/finder')}
+      >
+        Find Your Fragrance
+      </Button>
+    </div>
+  </div>
+
+  {/* Scroll Indicator */}
+  <div
+    className="fade-up d5"
+    style={{
+      position: 'absolute',
+      bottom: '32px',
+      display: 'flex',
+      flexDirection: 'column',
+      alignItems: 'center',
+      gap: '8px',
+      zIndex: 2,
+    }}
+  >
+    <span
+      style={{
+        fontSize: '9px',
+        letterSpacing: '0.22em',
+        textTransform: 'uppercase',
+        color: 'rgba(255,255,255,.75)',
+      }}
+    >
+      Scroll
+    </span>
+
+    <div
+      style={{
+        width: '1px',
+        height: '36px',
+        background:
+          'linear-gradient(to bottom, rgba(255,255,255,.8), transparent)',
+      }}
+    />
+  </div>
+</section>
 
       {/* ── DISCOVER BY MOOD ─────────────────────────────────── */}
       <section style={{ padding: 'var(--s9) 0', background: 'var(--bg)' }}>
@@ -149,10 +276,8 @@ export default function HomePage() {
       {/* ── FRAGRANCE FINDER TEASER ──────────────────────────── */}
       <section style={{ padding: 'var(--s10) 0', background: 'var(--bg)' }}>
         <div className="container">
-          <div className="two-col" style={{
-            alignItems: 'center',
+          <div className="two-col card-pad" style={{
             border: '1px solid var(--border)', borderRadius: '2px',
-            padding: 'var(--s9)',
             background: 'var(--bg-white)',
             boxShadow: 'var(--shadow-sm)',
           }}>
@@ -170,7 +295,7 @@ export default function HomePage() {
               </Button>
             </div>
 
-            <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'flex-end', gap: 'var(--s5)' }}>
+            <div className="hero-bottles">
               {displayFeatured.map((p, i) => (
                 <div key={p._id} style={{ transform: i === 1 ? 'translateY(-16px)' : 'none', opacity: i === 1 ? 1 : 0.7 }}>
                   {p.image ? (
@@ -254,7 +379,7 @@ function SectionHeader({ eyebrow, title, linkTo, linkLabel }) {
   const navigate = useNavigate();
 
   return (
-    <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', marginBottom: 'var(--s7)' }}>
+    <div className="section-header-row">
       <div>
         <p className="section-eyebrow">{eyebrow}</p>
         <h2 className="section-title">{title}</h2>

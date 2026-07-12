@@ -66,7 +66,7 @@ export default function QuizPage() {
         {/* ── INTRO ─────────────────────────────────────────── */}
         {step === 0 && (
           <div className="fade-in" style={{ textAlign: 'center' }}>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2,1fr)', gap: 'var(--s4)', marginBottom: 'var(--s7)' }}>
+            <div className="grid-cols-2" style={{ marginBottom: 'var(--s7)' }}>
               {[
                 { icon: '◈', title: 'Quick & Simple', sub: 'Just 4 questions' },
                 { icon: '◇', title: 'Personalised',   sub: 'Based on your lifestyle' },
@@ -132,11 +132,11 @@ export default function QuizPage() {
               </p>
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 'var(--s5)', marginBottom: 'var(--s7)' }}>
+            <div className="grid-cols-2" style={{ marginBottom: 'var(--s7)' }}>
               {getResults().map(p => <ProductCard key={p.id} product={p} />)}
             </div>
 
-            <div style={{ display: 'flex', gap: 'var(--s4)', justifyContent: 'center' }}>
+            <div className="btn-row-center">
               <Button variant="secondary" onClick={() => { setStep(0); setAnswers({}); }}>Retake Quiz</Button>
               <Button onClick={() => navigate('/shop')}>Shop All Fragrances</Button>
             </div>

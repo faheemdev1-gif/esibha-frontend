@@ -63,7 +63,7 @@ export default function FragranceFinderPage() {
         </p>
       </div>
 
-      <div style={{ maxWidth: '680px', margin: '0 auto', padding: 'var(--s9) var(--s7)' }}>
+      <div className="page-narrow">
 
         {/* ── OPTION A: Search ────────────────────────────── */}
         <div style={{ background: 'var(--bg-white)', border: '1px solid var(--border)', borderRadius: '2px', padding: 'var(--s6)', marginBottom: 'var(--s5)', boxShadow: 'var(--shadow-sm)' }}>

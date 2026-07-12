@@ -48,11 +48,10 @@ export default function JournalPage() {
         {posts[0] && (
           <div
             onClick={() => navigate(`/journal/${posts[0].slug}`)}
+            className="two-col card-pad"
             style={{
               background: 'var(--bg-white)', border: '1px solid var(--border)', borderRadius: '2px',
-              padding: 'var(--s8)', marginBottom: 'var(--s6)', cursor: 'pointer',
-              display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'var(--s8)',
-              alignItems: 'center', boxShadow: 'var(--shadow-sm)',
+              marginBottom: 'var(--s6)', cursor: 'pointer', boxShadow: 'var(--shadow-sm)',
               transition: 'box-shadow var(--base)',
             }}
             onMouseEnter={e => e.currentTarget.style.boxShadow = 'var(--shadow-md)'}
@@ -88,7 +87,7 @@ export default function JournalPage() {
         )}
 
         {/* Remaining posts grid */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 'var(--s5)' }}>
+        <div className="grid-cols-3">
           {posts.slice(1).map(post => (
             <article
               key={post.id}

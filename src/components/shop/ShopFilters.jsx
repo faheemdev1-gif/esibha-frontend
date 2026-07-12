@@ -6,14 +6,7 @@ export default function ShopFilters({ filters, onChange }) {
   const set = (key, val) => onChange({ ...filters, [key]: val });
 
   return (
-    <aside style={{
-      background: 'var(--bg-white)',
-      border: '1px solid var(--border)',
-      borderRadius: '2px',
-      padding: 'var(--s5)',
-      alignSelf: 'start',
-      position: 'sticky', top: 'calc(var(--nav-h) + 20px)',
-    }}>
+    <aside className="shop-filters">
       <div style={{ fontSize: '11px', fontWeight: 500, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'var(--text-primary)', marginBottom: 'var(--s5)', paddingBottom: 'var(--s4)', borderBottom: '1px solid var(--border)' }}>
         Filters
       </div>

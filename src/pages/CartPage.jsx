@@ -40,17 +40,12 @@ export default function CartPage() {
       </div>
 
       <div className="container" style={{ padding: 'var(--s7)' }}>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 360px', gap: 'var(--s8)', alignItems: 'start' }}>
+        <div className="sidebar-layout">
 
           {/* Items list */}
           <div>
             {items.map(item => (
-              <div key={item.key} style={{
-                background: 'var(--bg-white)', border: '1px solid var(--border)', borderRadius: '2px',
-                padding: 'var(--s5)', marginBottom: 'var(--s4)',
-                display: 'flex', gap: 'var(--s5)', alignItems: 'center',
-                boxShadow: 'var(--shadow-sm)',
-              }}>
+              <div key={item.key} className="cart-item">
                 {/* Bottle thumb */}
                 <div
                   onClick={() => navigate(`/product/${item.slug}`)}
@@ -82,7 +77,7 @@ export default function CartPage() {
                 </div>
 
                 {/* Price */}
-                <div style={{ fontFamily: 'var(--serif)', fontSize: '20px', fontWeight: 300, color: 'var(--text-primary)', flexShrink: 0 }}>
+                <div className="cart-item-price" style={{ fontFamily: 'var(--serif)', fontSize: '20px', fontWeight: 300, color: 'var(--text-primary)', flexShrink: 0 }}>
                   PKR {(item.price * item.qty).toLocaleString()}
                 </div>
               </div>
@@ -90,7 +85,7 @@ export default function CartPage() {
           </div>
 
           {/* Order summary */}
-          <div style={{ background: 'var(--bg-white)', border: '1px solid var(--border)', borderRadius: '2px', padding: 'var(--s6)', position: 'sticky', top: 'calc(var(--nav-h) + 20px)', boxShadow: 'var(--shadow-sm)' }}>
+          <div className="sticky-panel" style={{ background: 'var(--bg-white)', border: '1px solid var(--border)', borderRadius: '2px', padding: 'var(--s6)', boxShadow: 'var(--shadow-sm)' }}>
             <h2 style={{ fontFamily: 'var(--serif)', fontSize: '22px', fontWeight: 300, color: 'var(--text-primary)', marginBottom: 'var(--s5)', paddingBottom: 'var(--s4)', borderBottom: '1px solid var(--border)' }}>
               Order Summary
             </h2>
