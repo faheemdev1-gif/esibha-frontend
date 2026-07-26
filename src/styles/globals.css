@@ -31,7 +31,7 @@
 
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 html{scroll-behavior:smooth}
-body{font-family:var(--sans);background:var(--bg);color:var(--text-primary);-webkit-font-smoothing:antialiased;overflow-x:hidden;line-height:1.6}
+body{font-family:var(--sans);font-weight:500;background:var(--bg);color:var(--text-primary);-webkit-font-smoothing:antialiased;overflow-x:hidden;line-height:1.6}
 img,svg{display:block;max-width:100%}
 button{font-family:inherit;cursor:pointer}
 input,select,textarea{font-family:inherit}
@@ -49,8 +49,8 @@ a{text-decoration:none;color:inherit}
 .d1{animation-delay:80ms}.d2{animation-delay:160ms}.d3{animation-delay:260ms}.d4{animation-delay:380ms}.d5{animation-delay:500ms}
 
 .container{width:100%;max-width:1200px;margin:0 auto;padding:0 var(--s7)}
-.section-eyebrow{font-size:10px;letter-spacing:.22em;text-transform:uppercase;color:var(--accent);font-weight:400;margin-bottom:var(--s2)}
-.section-title{font-family:var(--serif);font-size:clamp(26px,3vw,38px);font-weight:300;color:var(--text-primary);line-height:1.15}
+.section-eyebrow{font-size:10px;letter-spacing:.22em;text-transform:uppercase;color:var(--accent);font-weight:500;margin-bottom:var(--s2)}
+.section-title{font-family:var(--serif);font-size:clamp(26px,3vw,38px);font-weight:400;color:var(--text-primary);line-height:1.15}
 .divider{display:flex;align-items:center;gap:var(--s4);color:var(--text-muted);font-size:10px;letter-spacing:.14em;text-transform:uppercase}
 .divider::before,.divider::after{content:'';flex:1;height:1px;background:var(--border)}
 .hover-line{position:relative}
