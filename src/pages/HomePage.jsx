@@ -5,6 +5,7 @@ import { JOURNAL_POSTS } from '../data/seed';
 import ProductCard from '../components/shop/ProductCard';
 import Button from '../components/ui/Button';
 import { ArrowRight } from '../components/ui/Icons';
+import ReviewGallery from '../components/reviews/ReviewGallery';
 import api from '../api/api';
 
 const MOODS = [
@@ -15,11 +16,17 @@ const MOODS = [
   { label: 'Night', sub: 'Dark & Musk', symbol: '◐' },
 ];
 
-const TESTIMONIALS = [
-  { text: 'Identical to the original — six people asked which perfume I was wearing.', author: 'Sana M.', city: 'Lahore' },
-  { text: 'eSibha made my wedding scent feel designed only for me. Truly bespoke.', author: 'Ayesha K.', city: 'Karachi' },
-  { text: 'Cedar Mystère is indistinguishable from Oud Wood at a fifth of the price.', author: 'Bilal R.', city: 'Islamabad' },
-  { text: 'The packaging, the longevity, the bottle — everything exactly as promised.', author: 'Zara F.', city: 'Dubai' },
+const CUSTOMER_REVIEWS = [
+  { name: 'Amin', image: '/reviews/amin.webp' },
+  { name: 'Fahad', image: '/reviews/fahad.webp' },
+  { name: 'Minahil', image: '/reviews/minahil.webp' },
+  { name: 'Muzdalfa', image: '/reviews/muzdalfa.webp' },
+  { name: 'Rahat', image: '/reviews/rahat.webp' },
+  { name: 'Riffat', image: '/reviews/riffat.webp' },
+  { name: 'Shahan Babar', image: '/reviews/shahan-babar.webp' },
+  { name: 'Stoic', image: '/reviews/stoic.webp' },
+  { name: 'Tahir', image: '/reviews/tahir.webp' },
+  { name: 'Customer review', image: '/reviews/g-13.webp' },
 ];
 
 export default function HomePage() {
@@ -58,6 +65,16 @@ export default function HomePage() {
 
   const displayFeatured =
     featured.length > 0 ? featured : products.slice(0, 3);
+
+  const menProducts = products
+    .filter(p => p.category === "Men's")
+    .sort((a, b) => (a.displayOrder ?? 0) - (b.displayOrder ?? 0))
+    .slice(0, 4);
+
+  const womenProducts = products
+    .filter(p => p.category === "Women's")
+    .sort((a, b) => (a.displayOrder ?? 0) - (b.displayOrder ?? 0))
+    .slice(0, 4);
 
   return (
     <div style={{ paddingTop: 'var(--nav-h)' }}>
@@ -273,6 +290,25 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* ── SHOP FOR MEN ─────────────────────────────────────── */}
+      <ProductCollectionSection
+        eyebrow="For Him"
+        title="Fragrances for Men"
+        products={menProducts}
+        loading={loadingProducts}
+        linkTo={`/shop?category=${encodeURIComponent("Men's")}`}
+      />
+
+      {/* ── SHOP FOR WOMEN ───────────────────────────────────── */}
+      <ProductCollectionSection
+        eyebrow="For Her"
+        title="Fragrances for Women"
+        products={womenProducts}
+        loading={loadingProducts}
+        linkTo={`/shop?category=${encodeURIComponent("Women's")}`}
+        alternate
+      />
+
       {/* ── FRAGRANCE FINDER TEASER ──────────────────────────── */}
       <section style={{ padding: 'var(--s10) 0', background: 'var(--bg)' }}>
         <div className="container">
@@ -324,28 +360,7 @@ export default function HomePage() {
       </section>
 
       {/* ── TESTIMONIALS ─────────────────────────────────────── */}
-      <section style={{ padding: 'var(--s9) 0', background: 'var(--bg-accent)', borderTop: '1px solid var(--border)' }}>
-        <div className="container">
-          <SectionHeader eyebrow="Client Stories" title="What They Say" />
-          <div className="grid-cols-4">
-            {TESTIMONIALS.map((t, i) => (
-              <div key={i} style={{
-                background: 'var(--bg-white)',
-                border: '1px solid var(--border)',
-                borderRadius: '2px', padding: 'var(--s5)',
-                boxShadow: 'var(--shadow-sm)',
-              }}>
-                <div style={{ fontFamily: 'var(--serif)', fontSize: '28px', color: 'var(--accent)', opacity: 0.4, lineHeight: 1, marginBottom: 'var(--s4)' }}>"</div>
-                <p style={{ fontSize: '13px', color: 'var(--text-secondary)', lineHeight: 1.7, fontStyle: 'italic', marginBottom: 'var(--s4)', fontWeight: 300 }}>
-                  {t.text}
-                </p>
-                <div style={{ fontSize: '11px', fontWeight: 500, color: 'var(--text-primary)', letterSpacing: '0.06em' }}>{t.author}</div>
-                <div style={{ fontSize: '10px', color: 'var(--text-muted)', marginTop: '2px' }}>{t.city}</div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
+      <ReviewGallery reviews={CUSTOMER_REVIEWS} />
 
       {/* ── JOURNAL TEASER ───────────────────────────────────── */}
       <section style={{ padding: 'var(--s9) 0', background: 'var(--bg-white)', borderTop: '1px solid var(--border)' }}>
@@ -402,6 +417,36 @@ function SectionHeader({ eyebrow, title, linkTo, linkLabel }) {
         </button>
       )}
     </div>
+  );
+}
+
+function ProductCollectionSection({ eyebrow, title, products, loading, linkTo, alternate = false }) {
+  return (
+    <section
+      style={{
+        padding: 'var(--s9) 0',
+        background: alternate ? 'var(--bg)' : 'var(--bg-white)',
+        borderTop: '1px solid var(--border)',
+      }}
+    >
+      <div className="container">
+        <SectionHeader eyebrow={eyebrow} title={title} linkTo={linkTo} linkLabel="View All" />
+
+        {loading ? (
+          <p style={{ fontSize: '13px', color: 'var(--text-muted)' }}>Loading products...</p>
+        ) : products.length === 0 ? (
+          <p style={{ fontSize: '13px', color: 'var(--text-muted)' }}>
+            No products are currently available in this collection.
+          </p>
+        ) : (
+          <div className="grid-cols-4">
+            {products.map(product => (
+              <ProductCard key={product._id} product={product} />
+            ))}
+          </div>
+        )}
+      </div>
+    </section>
   );
 }
 
