@@ -1,16 +1,9 @@
 import { useState, useMemo, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useSearchParams } from 'react-router-dom';
+import { useCategories } from '../api/storeConfig';
 import ProductCard from '../components/shop/ProductCard';
 import ShopFilters from '../components/shop/ShopFilters';
 import api from '../api/api';
-
-const CATEGORIES = {
-  mens: "Men's",
-  womens: "Women's",
-  unisex: 'Unisex',
-  gifts: 'Gift Packs',
-  seasonal: 'Seasonal',
-};
 
 const SORT_OPTIONS = [
   { value: 'default', label: 'Bestselling' },
@@ -21,6 +14,8 @@ const SORT_OPTIONS = [
 
 export default function ShopPage() {
   const { category } = useParams();
+  const [searchParams] = useSearchParams();
+  const categories = useCategories();
 
   const [allProducts, setAllProducts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -33,7 +28,7 @@ export default function ShopPage() {
 
   const [sort, setSort] = useState('default');
 
-  const catLabel = CATEGORIES[category] || null;
+  const catLabel = category ? categories.find(c => c.slug === category)?.name || category : searchParams.get('category') || null;
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -96,7 +91,7 @@ export default function ShopPage() {
     }
 
     if (sort === 'default') {
-      list.sort((a, b) => (b.bestseller ? 1 : 0) - (a.bestseller ? 1 : 0));
+      list.sort((a, b) => (a.displayOrder || 0) - (b.displayOrder || 0) || (b.bestseller ? 1 : 0) - (a.bestseller ? 1 : 0));
     }
 
     return list;
@@ -106,7 +101,7 @@ export default function ShopPage() {
 
   if (loading) {
     return (
-      <div style={{ paddingTop: 'var(--nav-h)', textAlign: 'center', padding: '120px 40px' }}>
+      <div style={{ padding: '120px 40px', textAlign: 'center' }}>
         Loading products...
       </div>
     );
@@ -154,14 +149,7 @@ export default function ShopPage() {
           </div>
 
           <div style={{ display: 'flex', gap: 'var(--s3)', marginTop: 'var(--s5)', flexWrap: 'wrap' }}>
-            {[
-              ['All', '/shop'],
-              ["Men's", '/shop/mens'],
-              ["Women's", '/shop/womens'],
-              ['Unisex', '/shop/unisex'],
-              ['Gift Packs', '/shop/gifts'],
-              ['Seasonal', '/shop/seasonal'],
-            ].map(([label, href]) => (
+            {[['All', '/shop'], ...categories.map(c => [c.name, `/shop/${c.slug}`])].map(([label, href]) => (
               <a
                 key={href}
                 href={href}
@@ -171,9 +159,9 @@ export default function ShopPage() {
                   textTransform: 'uppercase',
                   padding: '5px 14px',
                   borderRadius: '999px',
-                  border: `1px solid ${(!category && label === 'All') || CATEGORIES[category] === label ? 'var(--accent)' : 'var(--border)'}`,
-                  color: (!category && label === 'All') || CATEGORIES[category] === label ? 'var(--accent)' : 'var(--text-muted)',
-                  background: (!category && label === 'All') || CATEGORIES[category] === label ? 'var(--accent-light)' : 'transparent',
+                  border: `1px solid ${(!category && label === 'All') || catLabel === label ? 'var(--accent)' : 'var(--border)'}`,
+                  color: (!category && label === 'All') || catLabel === label ? 'var(--accent)' : 'var(--text-muted)',
+                  background: (!category && label === 'All') || catLabel === label ? 'var(--accent-light)' : 'transparent',
                   textDecoration: 'none',
                   transition: 'all var(--fast)',
                 }}

@@ -1,3 +1,4 @@
+import { useCategories } from '../../api/storeConfig';
 import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useCartStore, useUIStore } from '../../store';
@@ -14,6 +15,7 @@ const NAV_LINKS = [
 ];
 
 export default function Navbar() {
+  const categories = useCategories();
   const [scrolled,   setScrolled]   = useState(false);
   const [shopOpen,   setShopOpen]   = useState(false);
   const location = useLocation();
@@ -66,7 +68,7 @@ export default function Navbar() {
                 minWidth: '160px',
                 animation: 'slideDown var(--fast) var(--ease)',
               }}>
-                {[["Men's","/shop/mens"],["Women's","/shop/womens"],["Unisex","/shop/unisex"],["Gift Packs","/shop/gifts"],["Seasonal","/shop/seasonal"]].map(([l, h]) => (
+                {categories.map(c => [c.name, `/shop/${c.slug}`]).map(([l, h]) => (
                   <Link key={h} to={h} style={{
                     display: 'block', padding: '9px 20px',
                     fontSize: '12px', letterSpacing: '0.08em',

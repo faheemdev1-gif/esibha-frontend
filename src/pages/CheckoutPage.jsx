@@ -1,3 +1,4 @@
+import { useStoreSettings } from '../api/storeConfig';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useCartStore } from '../store';
@@ -6,12 +7,15 @@ import { ArrowLeft } from '../components/ui/Icons';
 import api from '../api/api';
 
 export default function CheckoutPage() {
+  const settings = useStoreSettings();
   const navigate = useNavigate();
   const { items, clearCart } = useCartStore();
 
   const subtotal = items.reduce((s, i) => s + i.price * i.qty, 0);
-  const shipping = subtotal >= 3000 ? 0 : 200;
+  const shipping = subtotal >= settings.freeShippingThreshold ? 0 : settings.shippingFee;
 
+  const [submitting, setSubmitting] = useState(false);
+  const [orderError, setOrderError] = useState('');
   const [promoCode, setPromoCode] = useState('');
   const [coupon, setCoupon] = useState(null);
   const [couponMessage, setCouponMessage] = useState('');
@@ -86,15 +90,16 @@ export default function CheckoutPage() {
       paymentMethod: form.paymentMethod,
     };
 
+    if (submitting) return;
+    setSubmitting(true); setOrderError('');
     try {
       await api.post('/orders', orderData);
 
       clearCart();
       navigate('/order-success');
     } catch (error) {
-      console.error(error);
-      alert('Failed to place order. Please try again.');
-    }
+      setOrderError(error.response?.data?.message || 'Failed to place order. Please try again.');
+    } finally { setSubmitting(false); }
   };
 
   if (items.length === 0) {
@@ -215,8 +220,10 @@ export default function CheckoutPage() {
               <Row label="Total" value={`PKR ${total.toLocaleString()}`} total />
             </div>
 
-            <Button fullWidth size="lg" type="submit">
-              Place Order
+            <p style={{ fontSize: 12, color: "var(--text-muted)", marginBottom: 12 }}>Prices and discounts are confirmed using current store prices when you place your order.</p>
+            {orderError && <p role="alert" style={{color:"#a33", marginBottom:12}}>{orderError}</p>}
+            <Button fullWidth size="lg" type="submit" disabled={submitting}>
+              {submitting ? "Placing order…" : "Place Order"}
             </Button>
           </div>
         </form>

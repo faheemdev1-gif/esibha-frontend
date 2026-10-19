@@ -1,16 +1,23 @@
-import { useState } from 'react';
-import { GIFT_PACKS } from '../data/seed';
+import { useState, useEffect } from 'react';
+import api from '../api/api';
+import { useStoreSettings } from '../api/storeConfig';
 import { useCartStore } from '../store';
 import Button from '../components/ui/Button';
 import { CheckIcon } from '../components/ui/Icons';
 
-const WRAP_OPTIONS = [
+const WRAP_LABELS = [
   { id: 'classic', label: 'Classic White', desc: 'Matte white box with ivory ribbon',    price: 0   },
   { id: 'luxury',  label: 'Luxury Black',  desc: 'Matte black with gold foil & ribbon',  price: 350 },
   { id: 'custom',  label: 'Custom Print',  desc: 'Personalised label on the outer wrap', price: 550 },
 ];
 
 export default function GiftingPage() {
+  const settings = useStoreSettings();
+  const WRAP_OPTIONS = WRAP_LABELS.map(w => ({ ...w, price: settings.wrapPrices[w.id] }));
+  const [packs, setPacks] = useState([]);
+  const [loadState, setLoadState] = useState('loading');
+  const fetchPacks = () => { setLoadState('loading'); api.get('/gift-packs').then(res => { setPacks(res.data.data); setLoadState('ready'); }).catch(() => setLoadState('error')); };
+  useEffect(() => { fetchPacks(); }, []);
   const [selectedWrap, setSelectedWrap] = useState('classic');
   const [message,      setMessage]      = useState('');
   const [added,        setAdded]        = useState(null);
@@ -18,8 +25,8 @@ export default function GiftingPage() {
 
   const handleAdd = pack => {
     const wrapPrice = WRAP_OPTIONS.find(w => w.id === selectedWrap)?.price ?? 0;
-    addItem({ ...pack, price: pack.price + wrapPrice, category: 'Gift Pack', family: 'Oud & Amber' }, 'Gift', 1);
-    setAdded(pack.id);
+    addItem({ ...pack, kind: 'gift', wrap: selectedWrap, giftMessage: message, price: pack.price + wrapPrice, category: 'Gift Pack', family: 'Oud & Amber' }, 'Gift', 1);
+    setAdded(pack._id);
     setTimeout(() => setAdded(null), 1800);
   };
 
@@ -43,9 +50,12 @@ export default function GiftingPage() {
           <p className="section-eyebrow">Curated Sets</p>
           <h2 className="section-title" style={{ marginBottom: 'var(--s7)' }}>Choose Your Set</h2>
 
+          {loadState === 'loading' && <p role="status">Loading gift packs…</p>}
+          {loadState === 'error' && <p role="alert">Could not load gift packs. <button onClick={fetchPacks}>Try again</button></p>}
+          {loadState === 'ready' && !packs.length && <p>Gift packs will be available soon.</p>}
           <div className="grid-cols-3">
-            {GIFT_PACKS.map(pack => (
-              <div key={pack.id} style={{
+            {packs.map(pack => (
+              <div key={pack._id} style={{
                 background: 'var(--bg-white)', border: '1px solid var(--border)',
                 borderRadius: '2px', padding: 'var(--s6)', boxShadow: 'var(--shadow-sm)',
               }}>
@@ -84,8 +94,8 @@ export default function GiftingPage() {
                   <span style={{ fontSize: '10px', color: 'var(--text-muted)' }}>+ wrapping</span>
                 </div>
 
-                <Button fullWidth variant={added === pack.id ? 'accent' : 'primary'} onClick={() => handleAdd(pack)}>
-                  {added === pack.id ? '✓ Added' : 'Add to Cart'}
+                <Button fullWidth disabled={!pack.inStock} variant={added === pack._id ? 'accent' : 'primary'} onClick={() => handleAdd(pack)}>
+                  {!pack.inStock ? 'Out of stock' : added === pack._id ? '✓ Added' : 'Add to Cart'}
                 </Button>
               </div>
             ))}

@@ -1,4 +1,6 @@
 import { useState } from 'react';
+import api from '../api/api';
+import { useStoreSettings } from '../api/storeConfig';
 import { LAB_NOTES } from '../data/seed';
 import Button from '../components/ui/Button';
 import FormField from '../components/ui/FormField';
@@ -6,13 +8,19 @@ import { CheckIcon, FlaskIcon } from '../components/ui/Icons';
 
 const MAX = { top: 3, heart: 3, base: 2 };
 
-const SIZES = [
-  { label: '30ml', price: 2800 },
-  { label: '50ml', price: 4200 },
-  { label: '100ml', price: 6800 },
-];
-
 export default function CustomLabPage() {
+  const settings = useStoreSettings();
+  const SIZES = Object.entries(settings.labPrices).map(([label,price]) => ({label,price}));
+  const [submitting,setSubmitting] = useState(false);
+  const [submitted,setSubmitted] = useState(false);
+  const [orderError,setOrderError] = useState('');
+  const submit = async () => {
+    if (submitting) return;
+    setSubmitting(true); setOrderError('');
+    try { await api.post('/custom-lab-orders', { perfumeName:name, selected, size, contact }); setSubmitted(true); }
+    catch(error) { setOrderError(error.response?.data?.message || 'Could not submit your order. Please try again.'); }
+    finally { setSubmitting(false); }
+  };
   const [selected, setSelected]   = useState({ top: [], heart: [], base: [] });
   const [size,     setSize]       = useState('30ml');
   const [name,     setName]       = useState('');
@@ -205,13 +213,12 @@ export default function CustomLabPage() {
               </div>
             </div>
 
+            {orderError && <p role="alert" style={{color:'#a33',marginBottom:16}}>{orderError}</p>}
+            {submitted && <p role="status" style={{color:'#286858',marginBottom:16}}>Your order has been received. Our team will contact you to confirm it.</p>}
             <div style={{ display: 'flex', gap: 'var(--s3)', justifyContent: 'space-between' }}>
-              <Button variant="secondary" onClick={() => setStep(2)}>← Back</Button>
-              <Button variant="accent" size="lg" onClick={() => {
-                // TODO: labService.submitOrder({ selected, size, name, contact })
-                alert('Order placed! We will confirm on WhatsApp within 24 hours.');
-              }}>
-                Place Order — PKR {price.toLocaleString()}
+              <Button variant="secondary" disabled={submitting || submitted} onClick={() => setStep(2)}>← Back</Button>
+              <Button variant="accent" size="lg" onClick={submit} disabled={submitting || submitted}>
+                {submitted ? 'Order received ✓' : submitting ? 'Placing order…' : `Place Order — PKR ${price.toLocaleString()}`}
               </Button>
             </div>
           </div>

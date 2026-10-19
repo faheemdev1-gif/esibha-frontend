@@ -1,3 +1,4 @@
+import { useStoreSettings } from '../api/storeConfig';
 import { useNavigate } from 'react-router-dom';
 import { useCartStore } from '../store';
 import BottleSVG from '../components/ui/BottleSVG';
@@ -5,10 +6,11 @@ import Button from '../components/ui/Button';
 import { ArrowLeft } from '../components/ui/Icons';
 
 export default function CartPage() {
+  const settings = useStoreSettings();
   const navigate = useNavigate();
   const { items, removeItem, updateQty, clearCart } = useCartStore();
   const subtotal  = items.reduce((s, i) => s + i.price * i.qty, 0);
-  const shipping  = subtotal >= 3000 ? 0 : 200;
+  const shipping  = subtotal >= settings.freeShippingThreshold ? 0 : settings.shippingFee;
   const total     = subtotal + shipping;
 
   if (items.length === 0) return (
@@ -103,7 +105,7 @@ export default function CartPage() {
 
             {shipping > 0 && (
               <div style={{ background: 'var(--bg-subtle)', borderRadius: '2px', padding: 'var(--s3)', marginBottom: 'var(--s4)', fontSize: '12px', color: 'var(--text-muted)', lineHeight: 1.6 }}>
-                Add PKR {(3000 - subtotal).toLocaleString()} more for free shipping.
+                Add PKR {(settings.freeShippingThreshold - subtotal).toLocaleString()} more for free shipping.
               </div>
             )}
 

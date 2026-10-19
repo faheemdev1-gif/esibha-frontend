@@ -1,3 +1,4 @@
+import { useStoreSettings } from '../../api/storeConfig';
 import { useCartStore, useUIStore } from '../../store';
 import { CloseIcon } from '../ui/Icons';
 import Button from '../ui/Button';
@@ -6,12 +7,13 @@ import { useNavigate } from 'react-router-dom';
 
 
 export default function CartDrawer() {
+  const settings = useStoreSettings();
     const navigate = useNavigate();
 
   const { cartOpen, closeCart } = useUIStore();
   const { items, removeItem, updateQty } = useCartStore();
   const subtotal = items.reduce((s, i) => s + i.price * i.qty, 0);
-  const shipping  = subtotal >= 3000 ? 0 : 200;
+  const shipping  = subtotal >= settings.freeShippingThreshold ? 0 : settings.shippingFee;
 
   if (!cartOpen) return null;
 
@@ -102,7 +104,7 @@ export default function CartDrawer() {
             </div>
             {shipping > 0 && (
               <p style={{ fontSize: '11px', color: 'var(--text-muted)', marginBottom: '14px', textAlign: 'center' }}>
-                Add PKR {(3000 - subtotal).toLocaleString()} for free shipping
+                Add PKR {(settings.freeShippingThreshold - subtotal).toLocaleString()} for free shipping
               </p>
             )}
             <Button

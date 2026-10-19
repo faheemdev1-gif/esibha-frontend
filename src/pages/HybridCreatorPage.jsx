@@ -1,3 +1,4 @@
+import { useStoreSettings } from '../api/storeConfig';
 
 import { useState, useEffect } from 'react';
 import Button from '../components/ui/Button';
@@ -7,6 +8,7 @@ import FormField from '../components/ui/FormField';
 import api from '../api/api';
 
 export default function HybridCreatorPage() {
+  const settings = useStoreSettings();
   const [products, setProducts] = useState([]);
   const [loadingProducts, setLoadingProducts] = useState(true);
 
@@ -20,11 +22,7 @@ export default function HybridCreatorPage() {
   const [submitting, setSubmitting] = useState(false);
   const [picking, setPicking] = useState(null);
 
-  const sizes = [
-    { label: '30ml', price: 3200 },
-    { label: '50ml', price: 4800 },
-    { label: '100ml', price: 7800 },
-  ];
+  const sizes = Object.entries(settings.hybridPrices).map(([label, price]) => ({label,price}));
 
   const price = sizes.find(s => s.label === size)?.price ?? 3200;
   const canSubmit = scentA && scentB && hybridName && contact.name && contact.phone && !submitting;

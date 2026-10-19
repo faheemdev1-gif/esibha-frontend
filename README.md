@@ -1,16 +1,13 @@
-# React + Vite
+# eSibha
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+React/Vite storefront and Express/MongoDB backend, with a complete admin workspace at `/admin`.
 
-Currently, two official plugins are available:
+Read **[ADMIN_SETUP.md](./ADMIN_SETUP.md)** for admin credentials, hosting variables, deployment steps and usage instructions.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+- Frontend: `npm ci`, then `npm run dev` or `npm run build`.
+- Frontend cart regression tests: `npm test`.
+- Backend: run `npm ci` and `npm start` inside `backend/` after configuring its environment.
+- Backend integration tests: run `npm test` inside `backend/`; they use a disposable test database.
+- Admin credentials: `npm run admin:credentials` inside `backend/`.
 
-## React Compiler
-
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
-
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+Live secrets and installed dependencies are excluded from the source archive. Keep the existing database/email environment values when deploying.

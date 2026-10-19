@@ -22,6 +22,7 @@ export default function ProductCard({ product }) {
   const handleAdd = e => {
     e.stopPropagation();
 
+    if (!product.inStock) return;
     setAdding(true);
     addItem(product, selectedSize, 1);
 
@@ -170,6 +171,7 @@ export default function ProductCard({ product }) {
       >
         <button
           onClick={handleAdd}
+          disabled={!product.inStock}
           style={{
             width: '100%',
             padding: '9px',
@@ -186,7 +188,7 @@ export default function ProductCard({ product }) {
             transition: 'all var(--fast)',
           }}
         >
-          {adding ? '✓ Added' : `Add ${selectedSize}`}
+          {!product.inStock ? 'Out of stock' : adding ? '✓ Added' : `Add ${selectedSize}`}
         </button>
       </div>
     </article>

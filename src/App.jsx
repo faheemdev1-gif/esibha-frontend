@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
-import { useEffect } from 'react';
+import { lazy, Suspense, useEffect } from 'react';
+const AdminApp = lazy(() => import('./admin/AdminApp')); 
 
 import Navbar      from './components/layout/Navbar';
 import Footer      from './components/layout/Footer';
@@ -74,7 +75,9 @@ function Layout() {
 export default function App() {
   return (
     <BrowserRouter>
-      <Layout />
+      <Suspense fallback={<div style={{ padding: 60 }}>Loading…</div>}>
+        <Routes><Route path="/admin/*" element={<AdminApp />} /><Route path="*" element={<Layout />} /></Routes>
+      </Suspense>
     </BrowserRouter>
   );
 }

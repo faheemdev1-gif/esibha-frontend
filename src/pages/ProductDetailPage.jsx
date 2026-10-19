@@ -82,6 +82,7 @@ export default function ProductDetailPage() {
     0;
 
   const handleAdd = () => {
+    if (!product.inStock) return;
     addItem(product, selectedSize, qty);
     setAdded(true);
     setTimeout(() => setAdded(false), 1800);
@@ -200,8 +201,8 @@ export default function ProductDetailPage() {
             </div>
 
             <div style={{ display: 'flex', gap: 'var(--s3)' }}>
-              <Button fullWidth onClick={handleAdd} variant={added ? 'accent' : 'primary'}>
-                {added ? '✓ Added to Cart' : 'Add to Cart'}
+              <Button fullWidth onClick={handleAdd} disabled={!product.inStock} variant={added ? 'accent' : 'primary'}>
+                {!product.inStock ? 'Out of stock' : added ? '✓ Added to Cart' : 'Add to Cart'}
               </Button>
 
               <button style={{ width: '48px', flexShrink: 0, background: 'transparent', border: '1px solid var(--border)', borderRadius: '2px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-muted)', transition: 'all var(--fast)' }}>
