@@ -1,0 +1,3 @@
+export const colors={bg:'#F7F7F8',bgWhite:'#FFFFFF',bgSubtle:'#EFEFF1',bgAccent:'#EDE8E0',border:'#E0E0E4',textPrimary:'#111318',textSecondary:'#4A4D57',textMuted:'#9B9EA8',accent:'#9A7B55',accentLight:'#EDE8DF',accentDark:'#7A5E38'};
+export const familyMeta={'Fresh & Citrus':{bg:'#E8F3F1',text:'#286858',border:'#A8CEC8'},'Oud & Amber':{bg:'#F3EBE0',text:'#7A5020',border:'#CCA870'},'Floral':{bg:'#F3E8F0',text:'#7A3868',border:'#CCAAC0'},'Woody & Oriental':{bg:'#EEE8E0',text:'#6A5028',border:'#BEA070'},'Musk':{bg:'#EBEBEB',text:'#505050',border:'#B8B8B8'}};
+export const fonts={serif:"'Cormorant Garamond',Georgia,serif",sans:"'Jost',system-ui,sans-serif"};

@@ -1,55 +1,42 @@
-# Homepage design update
+# Complete frontend: restore the Vercel build
 
-This update recreates the three supplied designs on the existing homepage:
+This download contains the complete frontend source and assets, including `src/main.jsx`, `src/App.jsx`, all existing pages, the admin panel, and the three redesigned homepage sections.
 
-- **Discover by Feeling:** five photographic mood collections with live text, icons, and Explore links.
-- **Fragrance Finder:** a large cream-and-gold banner using the supplied eSibha bottle photography, a working Finder link, and the three service steps.
-- **Stories & Craft:** photographic journal cards, category/date labels, gold ornaments, working article links, and the four craft values.
+## Restore the frontend
 
-The sections adapt to desktop, tablet, and phone sizes. Fonts are included locally with their licenses. Photography comes from the supplied references; headings, buttons, descriptions, metadata, and icons are HTML/SVG.
-
-## Apply to your existing frontend repository
-
-1. Extract `esibha-frontend-update.zip`.
-2. **Merge** the update's `src/` and `public/` folders into the matching folders in your existing main `esibha` project. Replace the matching files when asked. Copy the files into your current repository rather than replacing the whole project folder.
-3. Keep your current `.git`, `.env`, and `backend/` folders in place. This update contains no backend files or environment changes.
-4. From the main frontend project folder, run:
+1. Extract this new ZIP.
+2. Copy its complete `src/` and `public/` folders into the matching locations in your existing main `esibha` project. Merge and replace matching files. Do not replace the entire project directory.
+3. Keep your existing `.git`, `.env`, `.env.local` and separate `backend/` directory in place.
+4. In the main frontend folder, check the entry point and build:
 
 ```bash
+ls src/main.jsx
 npm run build
 ```
 
-No new npm packages are required. The update uses the dependencies already in the project.
-
-## Push the frontend
-
-From your main `esibha` folder, which uses `esibha-frontend.git`:
+5. After the build succeeds, push the frontend repository:
 
 ```bash
-git add src/pages/HomePage.jsx src/pages/ShopPage.jsx src/components/home public/images/home public/fonts
-git commit -m "Redesign homepage mood, finder and journal sections"
+git add src public
+git commit -m "Restore complete frontend and homepage design"
 git push
 ```
 
-Wait for Vercel's frontend deployment to finish, then reload the homepage. No backend push or admin credential changes are required for this update.
+Vercel should then deploy the new commit. If it still reports a missing `src/main.jsx`, check that GitHub's `esibha-frontend` repository contains `src/main.jsx` next to the `index.html` project root. Vercel's Root Directory must point to that same project root.
 
-## Mood collections
+The ZIP also contains the frontend root configuration files for completeness; retain your existing hosting environment values. No backend push is required.
 
-The Explore links filter the shop using the saved product **Mood** field from the admin panel. For example, Fresh shows products with mood `Fresh`. The visible Luxury card uses the backend's existing `Luxurious` value. Set these moods in the product editor if a collection is empty. A Clear mood link on the shop removes only the mood filter.
+## Local preview
 
-## Included files
+Keep the backend running with `npm start` in its own directory. In the main frontend folder, set `.env.local` to `VITE_API_URL=http://localhost:5000/api` and run `npm run dev`.
 
-- `src/pages/HomePage.jsx`
-- `src/pages/ShopPage.jsx`
-- `src/components/home/EditorialSections.jsx`
-- `src/components/home/editorial-sections.css`
-- `public/images/home/` — three supplied photography sources
-- `public/fonts/` — four font files and two licenses
+## Homepage changes
 
-## Validation
+- Five photographic mood collections with live labels and working mood filters.
+- Large Fragrance Finder banner with a working link.
+- Journal cards with article links, date/category labels, gold ornaments and craft values.
+- Locally bundled fonts and responsive desktop, tablet and phone layouts.
 
-- Production build and frontend cart regression tests.
-- Browser checks for all five mood links, filtered results, Luxury mapping, clearing the filter, the Finder button, all three article links, and All Posts navigation.
-- Layout and image loading checked at 1600, 1280, 1024, 768, 390, and 360 pixels wide.
+Assign product moods in the existing admin product editor to populate the collections. The visible Luxury collection uses the existing backend value `Luxurious`.
 
-The ZIP is a source update; it has not been pushed to your GitHub repository or deployed to your website.
+The earlier download was a partial update. This version includes the complete frontend folders to restore any files missing after a folder replacement.
