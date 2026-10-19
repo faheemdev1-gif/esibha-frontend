@@ -1,42 +1,50 @@
-import { useState, useMemo, useEffect } from 'react';
-import { useParams, useSearchParams } from 'react-router-dom';
-import { useCategories } from '../api/storeConfig';
-import ProductCard from '../components/shop/ProductCard';
-import ShopFilters from '../components/shop/ShopFilters';
-import api from '../api/api';
+import { useState, useMemo, useEffect } from "react";
+import { Link, useParams, useSearchParams } from "react-router-dom";
+import { useCategories } from "../api/storeConfig";
+import ProductCard from "../components/shop/ProductCard";
+import ShopFilters from "../components/shop/ShopFilters";
+import api from "../api/api";
 
 const SORT_OPTIONS = [
-  { value: 'default', label: 'Bestselling' },
-  { value: 'new', label: 'New Arrivals' },
-  { value: 'price-asc', label: 'Price: Low – High' },
-  { value: 'price-desc', label: 'Price: High – Low' },
+  { value: "default", label: "Bestselling" },
+  { value: "new", label: "New Arrivals" },
+  { value: "price-asc", label: "Price: Low – High" },
+  { value: "price-desc", label: "Price: High – Low" },
 ];
 
 export default function ShopPage() {
   const { category } = useParams();
   const [searchParams] = useSearchParams();
   const categories = useCategories();
+  const requestedMood = searchParams.get("mood");
+  const selectedMood = requestedMood === "Luxury" ? "Luxurious" : requestedMood;
+  const moodLabel = selectedMood === "Luxurious" ? "Luxury" : selectedMood;
+  const clearMoodParams = new URLSearchParams(searchParams);
+  clearMoodParams.delete("mood");
+  const clearMoodUrl = `${category ? `/shop/${category}` : "/shop"}${clearMoodParams.size ? `?${clearMoodParams}` : ""}`;
 
   const [allProducts, setAllProducts] = useState([]);
   const [loading, setLoading] = useState(true);
 
   const [filters, setFilters] = useState({
-    family: 'All',
+    family: "All",
     intensity: [],
     sizes: [],
   });
 
-  const [sort, setSort] = useState('default');
+  const [sort, setSort] = useState("default");
 
-  const catLabel = category ? categories.find(c => c.slug === category)?.name || category : searchParams.get('category') || null;
+  const catLabel = category
+    ? categories.find((c) => c.slug === category)?.name || category
+    : searchParams.get("category") || null;
 
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const res = await api.get('/products');
+        const res = await api.get("/products");
         setAllProducts(res.data.data || []);
       } catch (error) {
-        console.error('Failed to fetch products:', error);
+        console.error("Failed to fetch products:", error);
       } finally {
         setLoading(false);
       }
@@ -52,7 +60,11 @@ export default function ShopPage() {
       list = list.filter((p) => p.category === catLabel);
     }
 
-    if (filters.family !== 'All') {
+    if (selectedMood) {
+      list = list.filter((p) => p.mood === selectedMood);
+    }
+
+    if (filters.family !== "All") {
       list = list.filter((p) => p.family === filters.family);
     }
 
@@ -61,65 +73,110 @@ export default function ShopPage() {
         Light: [0, 40],
         Moderate: [40, 65],
         Strong: [65, 82],
-        'Very Strong': [82, 101],
+        "Very Strong": [82, 101],
       };
 
       list = list.filter((p) =>
         filters.intensity.some((i) => {
           const [min, max] = intensityMap[i] || [0, 101];
           return p.intensity >= min && p.intensity < max;
-        })
+        }),
       );
     }
 
     if (filters.sizes?.length) {
       list = list.filter((p) =>
-        p.sizes?.some((s) => filters.sizes.includes(s.label))
+        p.sizes?.some((s) => filters.sizes.includes(s.label)),
       );
     }
 
-    if (sort === 'price-asc') {
-      list.sort((a, b) => (a.sizes?.[0]?.price || 0) - (b.sizes?.[0]?.price || 0));
+    if (sort === "price-asc") {
+      list.sort(
+        (a, b) => (a.sizes?.[0]?.price || 0) - (b.sizes?.[0]?.price || 0),
+      );
     }
 
-    if (sort === 'price-desc') {
-      list.sort((a, b) => (b.sizes?.[0]?.price || 0) - (a.sizes?.[0]?.price || 0));
+    if (sort === "price-desc") {
+      list.sort(
+        (a, b) => (b.sizes?.[0]?.price || 0) - (a.sizes?.[0]?.price || 0),
+      );
     }
 
-    if (sort === 'new') {
+    if (sort === "new") {
       list.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
     }
 
-    if (sort === 'default') {
-      list.sort((a, b) => (a.displayOrder || 0) - (b.displayOrder || 0) || (b.bestseller ? 1 : 0) - (a.bestseller ? 1 : 0));
+    if (sort === "default") {
+      list.sort(
+        (a, b) =>
+          (a.displayOrder || 0) - (b.displayOrder || 0) ||
+          (b.bestseller ? 1 : 0) - (a.bestseller ? 1 : 0),
+      );
     }
 
     return list;
-  }, [allProducts, catLabel, filters, sort]);
+  }, [allProducts, catLabel, selectedMood, filters, sort]);
 
-  const pageTitle = catLabel || 'All Fragrances';
+  const pageTitle = catLabel
+    ? `${catLabel}${moodLabel ? ` · ${moodLabel}` : ""}`
+    : moodLabel
+      ? `${moodLabel} Fragrances`
+      : "All Fragrances";
 
   if (loading) {
     return (
-      <div style={{ padding: '120px 40px', textAlign: 'center' }}>
+      <div style={{ padding: "120px 40px", textAlign: "center" }}>
         Loading products...
       </div>
     );
   }
 
   return (
-    <div style={{ paddingTop: 'var(--nav-h)' }}>
-      <div style={{ background: 'var(--bg-white)', borderBottom: '1px solid var(--border)', padding: 'var(--s7) var(--s7) var(--s5)' }}>
+    <div style={{ paddingTop: "var(--nav-h)" }}>
+      <div
+        style={{
+          background: "var(--bg-white)",
+          borderBottom: "1px solid var(--border)",
+          padding: "var(--s7) var(--s7) var(--s5)",
+        }}
+      >
         <div className="container" style={{ padding: 0 }}>
           <p className="section-eyebrow">Collection</p>
 
-          <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', flexWrap: 'wrap', gap: 'var(--s4)' }}>
-            <h1 style={{ fontFamily: 'var(--serif)', fontSize: 'clamp(32px,5vw,52px)', fontWeight: 300, color: 'var(--text-primary)' }}>
+          <div
+            style={{
+              display: "flex",
+              alignItems: "flex-end",
+              justifyContent: "space-between",
+              flexWrap: "wrap",
+              gap: "var(--s4)",
+            }}
+          >
+            <h1
+              style={{
+                fontFamily: "var(--serif)",
+                fontSize: "clamp(32px,5vw,52px)",
+                fontWeight: 300,
+                color: "var(--text-primary)",
+              }}
+            >
               {pageTitle}
             </h1>
 
-            <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--s3)' }}>
-              <span style={{ fontSize: '11px', color: 'var(--text-muted)', letterSpacing: '0.08em' }}>
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "var(--s3)",
+              }}
+            >
+              <span
+                style={{
+                  fontSize: "11px",
+                  color: "var(--text-muted)",
+                  letterSpacing: "0.08em",
+                }}
+              >
                 {products.length} fragrances
               </span>
 
@@ -127,16 +184,16 @@ export default function ShopPage() {
                 value={sort}
                 onChange={(e) => setSort(e.target.value)}
                 style={{
-                  background: 'var(--bg)',
-                  border: '1px solid var(--border)',
-                  color: 'var(--text-secondary)',
-                  padding: '8px 14px',
-                  borderRadius: '2px',
-                  fontSize: '11px',
-                  letterSpacing: '0.06em',
-                  fontFamily: 'var(--sans)',
-                  outline: 'none',
-                  cursor: 'pointer',
+                  background: "var(--bg)",
+                  border: "1px solid var(--border)",
+                  color: "var(--text-secondary)",
+                  padding: "8px 14px",
+                  borderRadius: "2px",
+                  fontSize: "11px",
+                  letterSpacing: "0.06em",
+                  fontFamily: "var(--sans)",
+                  outline: "none",
+                  cursor: "pointer",
                 }}
               >
                 {SORT_OPTIONS.map((o) => (
@@ -148,22 +205,66 @@ export default function ShopPage() {
             </div>
           </div>
 
-          <div style={{ display: 'flex', gap: 'var(--s3)', marginTop: 'var(--s5)', flexWrap: 'wrap' }}>
-            {[['All', '/shop'], ...categories.map(c => [c.name, `/shop/${c.slug}`])].map(([label, href]) => (
+          {selectedMood && (
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: 14,
+                marginTop: 20,
+                flexWrap: "wrap",
+              }}
+            >
+              <span style={{ fontSize: 13, color: "var(--text-secondary)" }}>
+                Selected mood: {moodLabel}
+              </span>
+              <Link
+                to={clearMoodUrl}
+                aria-label="Clear mood filter"
+                style={{
+                  fontSize: 12,
+                  color: "var(--accent)",
+                  textDecoration: "underline",
+                  textUnderlineOffset: 3,
+                }}
+              >
+                Clear mood ×
+              </Link>
+            </div>
+          )}
+
+          <div
+            style={{
+              display: "flex",
+              gap: "var(--s3)",
+              marginTop: "var(--s5)",
+              flexWrap: "wrap",
+            }}
+          >
+            {[
+              ["All", "/shop"],
+              ...categories.map((c) => [c.name, `/shop/${c.slug}`]),
+            ].map(([label, href]) => (
               <a
                 key={href}
                 href={href}
                 style={{
-                  fontSize: '11px',
-                  letterSpacing: '0.12em',
-                  textTransform: 'uppercase',
-                  padding: '5px 14px',
-                  borderRadius: '999px',
-                  border: `1px solid ${(!category && label === 'All') || catLabel === label ? 'var(--accent)' : 'var(--border)'}`,
-                  color: (!category && label === 'All') || catLabel === label ? 'var(--accent)' : 'var(--text-muted)',
-                  background: (!category && label === 'All') || catLabel === label ? 'var(--accent-light)' : 'transparent',
-                  textDecoration: 'none',
-                  transition: 'all var(--fast)',
+                  fontSize: "11px",
+                  letterSpacing: "0.12em",
+                  textTransform: "uppercase",
+                  padding: "5px 14px",
+                  borderRadius: "999px",
+                  border: `1px solid ${(!category && label === "All") || catLabel === label ? "var(--accent)" : "var(--border)"}`,
+                  color:
+                    (!category && label === "All") || catLabel === label
+                      ? "var(--accent)"
+                      : "var(--text-muted)",
+                  background:
+                    (!category && label === "All") || catLabel === label
+                      ? "var(--accent-light)"
+                      : "transparent",
+                  textDecoration: "none",
+                  transition: "all var(--fast)",
                 }}
               >
                 {label}
@@ -173,17 +274,24 @@ export default function ShopPage() {
         </div>
       </div>
 
-      <div className="container" style={{ padding: 'var(--s7)' }}>
+      <div className="container" style={{ padding: "var(--s7)" }}>
         <div className="shop-layout">
           <ShopFilters filters={filters} onChange={setFilters} />
 
           <div>
             {products.length === 0 ? (
-              <div style={{ textAlign: 'center', paddingTop: 'var(--s10)' }}>
-                <p style={{ fontFamily: 'var(--serif)', fontSize: '26px', color: 'var(--text-muted)', marginBottom: 'var(--s3)' }}>
+              <div style={{ textAlign: "center", paddingTop: "var(--s10)" }}>
+                <p
+                  style={{
+                    fontFamily: "var(--serif)",
+                    fontSize: "26px",
+                    color: "var(--text-muted)",
+                    marginBottom: "var(--s3)",
+                  }}
+                >
                   No results
                 </p>
-                <p style={{ fontSize: '13px', color: 'var(--text-muted)' }}>
+                <p style={{ fontSize: "13px", color: "var(--text-muted)" }}>
                   Try adjusting your filters.
                 </p>
               </div>
