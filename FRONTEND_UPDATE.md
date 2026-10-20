@@ -1,42 +1,7 @@
-# Complete frontend: restore the Vercel build
+# Complete frontend update
 
-This download contains the complete frontend source and assets, including `src/main.jsx`, `src/App.jsx`, all existing pages, the admin panel, and the three redesigned homepage sections.
+This archive contains the complete frontend, including `src/main.jsx` and all existing source files and assets. Copy its contents into the main frontend repository folder. Keep your existing `.git`, `.env` and nested `backend` folder.
 
-## Restore the frontend
+This version also needs the accompanying backend update. Deploy the backend first. Read `CATALOG_UPDATE.md` for installation, local startup, admin usage and the separate repository push commands.
 
-1. Extract this new ZIP.
-2. Copy its complete `src/` and `public/` folders into the matching locations in your existing main `esibha` project. Merge and replace matching files. Do not replace the entire project directory.
-3. Keep your existing `.git`, `.env`, `.env.local` and separate `backend/` directory in place.
-4. In the main frontend folder, check the entry point and build:
-
-```bash
-ls src/main.jsx
-npm run build
-```
-
-5. After the build succeeds, push the frontend repository:
-
-```bash
-git add src public
-git commit -m "Restore complete frontend and homepage design"
-git push
-```
-
-Vercel should then deploy the new commit. If it still reports a missing `src/main.jsx`, check that GitHub's `esibha-frontend` repository contains `src/main.jsx` next to the `index.html` project root. Vercel's Root Directory must point to that same project root.
-
-The ZIP also contains the frontend root configuration files for completeness; retain your existing hosting environment values. No backend push is required.
-
-## Local preview
-
-Keep the backend running with `npm start` in its own directory. In the main frontend folder, set `.env.local` to `VITE_API_URL=http://localhost:5000/api` and run `npm run dev`.
-
-## Homepage changes
-
-- Five photographic mood collections with live labels and working mood filters.
-- Large Fragrance Finder banner with a working link.
-- Journal cards with article links, date/category labels, gold ornaments and craft values.
-- Locally bundled fonts and responsive desktop, tablet and phone layouts.
-
-Assign product moods in the existing admin product editor to populate the collections. The visible Luxury collection uses the existing backend value `Luxurious`.
-
-The earlier download was a partial update. This version includes the complete frontend folders to restore any files missing after a folder replacement.
+From the frontend folder, run `npm ci`, `npm test`, and `npm run build`. Run `npm run dev` for localhost. On Vercel, use the frontend repository root, build command `npm run build`, output directory `dist`, and the existing `VITE_API_URL` environment value for your backend API.

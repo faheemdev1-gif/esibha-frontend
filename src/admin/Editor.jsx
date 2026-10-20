@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
-import { adminApi, mediaUrl } from "../api/api";
+import { adminApi } from "../api/api";
+import ImageGalleryEditor from "./ImageGalleryEditor";
 import { errorMessage, slugify } from "./fields";
 export function Dialog({ title, children, onClose, busy = false }) {
   const ref = useRef(null);
@@ -41,10 +42,25 @@ function localDate(value) {
     .toISOString()
     .slice(0, 16);
 }
-export default function Editor({ config, item, categories, onClose, onSaved }) {
+export default function Editor({
+  config,
+  item,
+  catalogOptions,
+  onClose,
+  onSaved,
+}) {
   const [draft, setDraft] = useState(() => ({
     ...structuredClone(config.defaults),
     ...structuredClone(item || {}),
+    ...(config.endpoint === "/products"
+      ? {
+          images: item?.images?.length
+            ? [...item.images]
+            : item?.image
+              ? [item.image]
+              : [],
+        }
+      : {}),
   }));
   const [busy, setBusy] = useState(false);
   const [uploading, setUploading] = useState(false);
@@ -59,31 +75,6 @@ export default function Editor({ config, item, categories, onClose, onSaved }) {
         ? { slug: slugify(value) }
         : {}),
     }));
-  const upload = async (event) => {
-    const file = event.target.files?.[0];
-    event.target.value = "";
-    if (!file) return;
-    if (file.size > 5 * 1024 * 1024) {
-      setError("Choose an image smaller than 5 MB.");
-      return;
-    }
-    setUploading(true);
-    setError("");
-    try {
-      const data = await new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = () => resolve(reader.result);
-        reader.onerror = reject;
-        reader.readAsDataURL(file);
-      });
-      const res = await adminApi.post("/media", { name: file.name, data });
-      set("image", mediaUrl(res.data.data.path));
-    } catch (error) {
-      setError(errorMessage(error));
-    } finally {
-      setUploading(false);
-    }
-  };
   const save = async (event) => {
     event.preventDefault();
     setError("");
@@ -108,7 +99,10 @@ export default function Editor({ config, item, categories, onClose, onSaved }) {
             value = value ? new Date(value).toISOString() : null;
           if (type === "sizes")
             value = value.map((s) => ({
-              label: s.label,
+              label: s.label.trim(),
+              sku: (s.sku || "").trim(),
+              inStock: s.inStock !== false,
+              images: s.images || [],
               price: Number(s.price),
             }));
           return [key, value];
@@ -121,9 +115,10 @@ export default function Editor({ config, item, categories, onClose, onSaved }) {
       }
       if (
         body.sizes &&
-        new Set(body.sizes.map((s) => s.label)).size !== body.sizes.length
+        new Set(body.sizes.map((s) => s.label.toLowerCase())).size !==
+          body.sizes.length
       )
-        throw Error("Each size can only be listed once.");
+        throw Error("Each variation label can only be listed once.");
       if (item?._id)
         await adminApi.patch(`${config.endpoint}/${item._id}`, body);
       else await adminApi.post(config.endpoint, body);
@@ -163,118 +158,125 @@ export default function Editor({ config, item, categories, onClose, onSaved }) {
                 return (
                   <div key={key} className="adm-field adm-full">
                     <span>{label} *</span>
-                    {draft.sizes.map((size, index) => (
-                      <div className="adm-size-row" key={index}>
-                        <select
-                          aria-label={`Size ${index + 1}`}
-                          value={size.label}
-                          onChange={(e) =>
-                            set(
-                              "sizes",
-                              draft.sizes.map((s, i) =>
-                                i === index
-                                  ? { ...s, label: e.target.value }
-                                  : s,
-                              ),
-                            )
-                          }
-                        >
-                          {["5ml", "30ml", "50ml", "100ml"].map((s) => (
-                            <option key={s}>{s}</option>
-                          ))}
-                        </select>
-                        <input
-                          aria-label={`Price for ${size.label}`}
-                          type="number"
-                          min="0"
-                          step="0.01"
-                          required
-                          value={size.price}
-                          onChange={(e) =>
-                            set(
-                              "sizes",
-                              draft.sizes.map((s, i) =>
-                                i === index
-                                  ? { ...s, price: e.target.value }
-                                  : s,
-                              ),
-                            )
-                          }
-                        />
-                        <button
-                          type="button"
-                          className="adm-btn"
-                          disabled={draft.sizes.length === 1}
-                          onClick={() =>
-                            set(
-                              "sizes",
-                              draft.sizes.filter((_, i) => i !== index),
-                            )
-                          }
-                        >
-                          Remove
-                        </button>
-                      </div>
-                    ))}
+                    <p className="adm-gallery-help">
+                      Create bottle sizes or other variations. Each label must
+                      be unique.
+                    </p>
+                    {draft.sizes.map((size, index) => {
+                      const change = (patch) =>
+                        set(
+                          "sizes",
+                          draft.sizes.map((s, i) =>
+                            i === index ? { ...s, ...patch } : s,
+                          ),
+                        );
+                      return (
+                        <div className="adm-variation" key={index}>
+                          <div className="adm-variation-fields">
+                            <label className="adm-field">
+                              <span>Variation label *</span>
+                              <input
+                                aria-label={`Variation ${index + 1} label`}
+                                required
+                                maxLength={80}
+                                placeholder="30ml, 100ml, gift boxed…"
+                                value={size.label}
+                                onChange={(e) =>
+                                  change({ label: e.target.value })
+                                }
+                              />
+                            </label>
+                            <label className="adm-field">
+                              <span>Price (PKR) *</span>
+                              <input
+                                aria-label={`Price for ${size.label || index + 1}`}
+                                type="number"
+                                min="0"
+                                step="0.01"
+                                required
+                                value={size.price}
+                                onChange={(e) =>
+                                  change({ price: e.target.value })
+                                }
+                              />
+                            </label>
+                            <label className="adm-field">
+                              <span>SKU (optional)</span>
+                              <input
+                                aria-label={`SKU for ${size.label || index + 1}`}
+                                maxLength={100}
+                                value={size.sku || ""}
+                                onChange={(e) =>
+                                  change({ sku: e.target.value })
+                                }
+                              />
+                            </label>
+                            <label className="adm-check">
+                              <input
+                                type="checkbox"
+                                checked={size.inStock !== false}
+                                onChange={(e) =>
+                                  change({ inStock: e.target.checked })
+                                }
+                              />
+                              Variation in stock
+                            </label>
+                          </div>
+                          <ImageGalleryEditor
+                            images={size.images || []}
+                            onChange={(images) => change({ images })}
+                            onBusy={setUploading}
+                            onError={setError}
+                            limit={8}
+                            label={`Variation ${index + 1} photos`}
+                            library={draft.images || []}
+                          />
+                          <button
+                            type="button"
+                            className="adm-btn"
+                            disabled={draft.sizes.length === 1}
+                            onClick={() =>
+                              set(
+                                "sizes",
+                                draft.sizes.filter((_, i) => i !== index),
+                              )
+                            }
+                          >
+                            Remove variation
+                          </button>
+                        </div>
+                      );
+                    })}
                     <button
                       type="button"
                       className="adm-btn"
-                      disabled={draft.sizes.length >= 4}
                       onClick={() =>
                         set("sizes", [
                           ...draft.sizes,
                           {
-                            label: ["5ml", "30ml", "50ml", "100ml"].find(
-                              (label) =>
-                                !draft.sizes.some((s) => s.label === label),
-                            ),
+                            label: "",
                             price: 0,
+                            sku: "",
+                            inStock: true,
+                            images: [],
                           },
                         ])
                       }
                     >
-                      + Add size
+                      + Add variation
                     </button>
                   </div>
                 );
-              if (type === "image")
+              if (type === "images")
                 return (
                   <div key={key} className="adm-field adm-full">
                     <span>{label}</span>
-                    <div className="adm-image-editor">
-                      {draft.image && (
-                        <img
-                          src={mediaUrl(draft.image)}
-                          alt="Product preview"
-                        />
-                      )}
-                      <div>
-                        <label className="adm-btn">
-                          {uploading ? "Uploading…" : "Upload image"}
-                          <input
-                            type="file"
-                            accept="image/png,image/jpeg,image/webp,image/gif"
-                            onChange={upload}
-                          />
-                        </label>
-                        <small>PNG, JPEG, WebP or GIF · up to 5 MB</small>
-                        {draft.image && (
-                          <button
-                            type="button"
-                            className="adm-link"
-                            onClick={() => set("image", "")}
-                          >
-                            Remove image
-                          </button>
-                        )}
-                      </div>
-                    </div>
-                    <input
-                      aria-label="Image URL"
-                      type="url"
-                      value={draft.image || ""}
-                      placeholder="Or paste an https:// image URL"
-                      onChange={(e) => set("image", e.target.value)}
+                    <ImageGalleryEditor
+                      images={draft.images || []}
+                      onChange={(images) => set("images", images)}
+                      onBusy={setUploading}
+                      onError={setError}
+                      label="Product photos"
                     />
                   </div>
                 );
@@ -302,19 +304,19 @@ export default function Editor({ config, item, categories, onClose, onSaved }) {
                   </span>
                   {type === "textarea" ? (
                     <textarea rows="4" {...props} />
-                  ) : ["select", "category"].includes(type) ? (
+                  ) : ["select", "category", "taxonomy"].includes(type) ? (
                     <select {...props}>
-                      {type === "category" && (
-                        <option value="">Choose category</option>
+                      {type !== "select" && (
+                        <option value="">Choose {label.toLowerCase()}</option>
                       )}
-                      {(type === "category"
-                        ? [
+                      {(type === "select"
+                        ? options
+                        : [
                             ...new Set([
-                              ...categories.map((c) => c.name),
-                              ...(draft.category ? [draft.category] : []),
+                              ...(catalogOptions[key] || []).map((c) => c.name),
+                              ...(draft[key] ? [draft[key]] : []),
                             ]),
                           ]
-                        : options
                       ).map((v) => (
                         <option key={v} value={v}>
                           {v}
@@ -352,9 +354,7 @@ export default function Editor({ config, item, categories, onClose, onSaved }) {
                         type === "slug" ? "[a-z0-9]+(-[a-z0-9]+)*" : undefined
                       }
                       maxLength={
-                        key === "name" && config.endpoint === "/categories"
-                          ? 80
-                          : undefined
+                        key === "name" && config.taxonomy ? 80 : undefined
                       }
                     />
                   )}

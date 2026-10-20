@@ -13,17 +13,15 @@ const freshStore = async () =>
 test("a persisted cart survives a full page/module reload", async () => {
   values.clear();
   const first = await freshStore();
-  first
-    .getState()
-    .addItem(
-      {
-        _id: "product-one",
-        name: "Fragrance",
-        sizes: [{ label: "30ml", price: 3450 }],
-      },
-      "30ml",
-      2,
-    );
+  first.getState().addItem(
+    {
+      _id: "product-one",
+      name: "Fragrance",
+      sizes: [{ label: "30ml", price: 3450 }],
+    },
+    "30ml",
+    2,
+  );
   const afterReload = await freshStore();
   assert.equal(afterReload.getState().items.length, 1);
   assert.equal(afterReload.getState().items[0].qty, 2);
@@ -53,4 +51,31 @@ test("different gift wrapping and personal messages remain distinct cart items",
   assert.equal(items.length, 3);
   assert.equal(items[0].qty, 2);
   assert.equal(items[1].price, 2550);
+});
+test("the selected variation photo, SKU and zero price survive cart persistence", async () => {
+  values.clear();
+  const store = await freshStore();
+  store
+    .getState()
+    .addItem(
+      {
+        _id: "photo-product",
+        image: "old.jpg",
+        images: ["cover.jpg"],
+        sizes: [
+          {
+            label: "Sample",
+            price: 0,
+            sku: "ES-SAMPLE",
+            images: ["sample.jpg"],
+          },
+        ],
+      },
+      "Sample",
+      1,
+    );
+  const item = (await freshStore()).getState().items[0];
+  assert.equal(item.image, "sample.jpg");
+  assert.equal(item.price, 0);
+  assert.equal(item.sku, "ES-SAMPLE");
 });

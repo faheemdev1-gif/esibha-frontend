@@ -1,23 +1,22 @@
-
-import { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import { useCartStore } from '../store';
-import BottleSVG from '../components/ui/BottleSVG';
-import FamilyTag from '../components/ui/FamilyTag';
-import IntensityBar from '../components/ui/IntensityBar';
-import Button from '../components/ui/Button';
-import ProductCard from '../components/shop/ProductCard';
-import { HeartIcon, ArrowLeft } from '../components/ui/Icons';
-import api from '../api/api';
+import { useState, useEffect } from "react";
+import { useParams, useNavigate } from "react-router-dom";
+import { useCartStore } from "../store";
+import ProductGallery from "../components/shop/ProductGallery";
+import FamilyTag from "../components/ui/FamilyTag";
+import IntensityBar from "../components/ui/IntensityBar";
+import Button from "../components/ui/Button";
+import ProductCard from "../components/shop/ProductCard";
+import { HeartIcon, ArrowLeft } from "../components/ui/Icons";
+import api from "../api/api";
 
 export default function ProductDetailPage() {
   const { slug } = useParams();
   const navigate = useNavigate();
-  const addItem = useCartStore(s => s.addItem);
+  const addItem = useCartStore((s) => s.addItem);
 
   const [product, setProduct] = useState(null);
   const [related, setRelated] = useState([]);
-  const [selectedSize, setSelectedSize] = useState('30ml');
+  const [selectedSize, setSelectedSize] = useState("30ml");
   const [qty, setQty] = useState(1);
   const [added, setAdded] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -29,20 +28,26 @@ export default function ProductDetailPage() {
         const currentProduct = productRes.data.data;
 
         setProduct(currentProduct);
-        setSelectedSize(currentProduct?.sizes?.[0]?.label || '30ml');
+        setSelectedSize(
+          currentProduct?.sizes?.find((size) => size.inStock !== false)
+            ?.label ||
+            currentProduct?.sizes?.[0]?.label ||
+            "30ml",
+        );
 
-        const relatedRes = await api.get('/products');
+        const relatedRes = await api.get("/products");
         const relatedProducts = (relatedRes.data.data || [])
           .filter(
-            p =>
+            (p) =>
               p._id !== currentProduct._id &&
-              (p.family === currentProduct.family || p.category === currentProduct.category)
+              (p.family === currentProduct.family ||
+                p.category === currentProduct.category),
           )
           .slice(0, 4);
 
         setRelated(relatedProducts);
       } catch (error) {
-        console.error('Failed to fetch product:', error);
+        console.error("Failed to fetch product:", error);
         setProduct(null);
       } finally {
         setLoading(false);
@@ -54,7 +59,7 @@ export default function ProductDetailPage() {
 
   if (loading) {
     return (
-      <div style={{ paddingTop: 'var(--nav-h)', textAlign: 'center', padding: '120px 40px' }}>
+      <div style={{ textAlign: "center", padding: "120px 40px" }}>
         Loading fragrance...
       </div>
     );
@@ -62,13 +67,27 @@ export default function ProductDetailPage() {
 
   if (!product) {
     return (
-      <div style={{ paddingTop: 'var(--nav-h)', textAlign: 'center', padding: '120px 40px' }}>
-        <p style={{ fontFamily: 'var(--serif)', fontSize: '28px', color: 'var(--text-muted)' }}>
+      <div style={{ textAlign: "center", padding: "120px 40px" }}>
+        <p
+          style={{
+            fontFamily: "var(--serif)",
+            fontSize: "28px",
+            color: "var(--text-muted)",
+          }}
+        >
           Fragrance not found.
         </p>
         <button
-          onClick={() => navigate('/shop')}
-          style={{ marginTop: '20px', background: 'none', border: 'none', cursor: 'pointer', color: 'var(--accent)', fontSize: '13px', letterSpacing: '0.1em' }}
+          onClick={() => navigate("/shop")}
+          style={{
+            marginTop: "20px",
+            background: "none",
+            border: "none",
+            cursor: "pointer",
+            color: "var(--accent)",
+            fontSize: "13px",
+            letterSpacing: "0.1em",
+          }}
         >
           ← Back to Shop
         </button>
@@ -76,81 +95,168 @@ export default function ProductDetailPage() {
     );
   }
 
-  const currentPrice =
-    product.sizes?.find(s => s.label === selectedSize)?.price ||
-    product.sizes?.[0]?.price ||
-    0;
+  const variation =
+    product.sizes?.find((s) => s.label === selectedSize) || product.sizes?.[0];
+  const currentPrice = variation?.price ?? 0;
+  const available = product.inStock !== false && variation?.inStock !== false;
 
   const handleAdd = () => {
-    if (!product.inStock) return;
+    if (!available) return;
     addItem(product, selectedSize, qty);
     setAdded(true);
     setTimeout(() => setAdded(false), 1800);
   };
 
   return (
-    <div style={{ paddingTop: 'var(--nav-h)', background: 'var(--bg)' }}>
-      <div className="container" style={{ padding: 'var(--s7)' }}>
-        <div style={{ display: 'flex', gap: 'var(--s2)', alignItems: 'center', marginBottom: 'var(--s6)' }}>
+    <div style={{ paddingTop: "var(--nav-h)", background: "var(--bg)" }}>
+      <div className="container" style={{ padding: "var(--s7)" }}>
+        <div
+          style={{
+            display: "flex",
+            gap: "var(--s2)",
+            alignItems: "center",
+            marginBottom: "var(--s6)",
+          }}
+        >
           <button
-            onClick={() => navigate('/shop')}
-            style={{ background: 'none', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px', color: 'var(--text-muted)', fontSize: '12px', letterSpacing: '0.06em' }}
+            onClick={() => navigate("/shop")}
+            style={{
+              background: "none",
+              border: "none",
+              cursor: "pointer",
+              display: "flex",
+              alignItems: "center",
+              gap: "6px",
+              color: "var(--text-muted)",
+              fontSize: "12px",
+              letterSpacing: "0.06em",
+            }}
           >
             <ArrowLeft size={14} /> Shop
           </button>
-          <span style={{ color: 'var(--border)', fontSize: '12px' }}>/</span>
-          <span style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>{product.name}</span>
+          <span style={{ color: "var(--border)", fontSize: "12px" }}>/</span>
+          <span style={{ fontSize: "12px", color: "var(--text-secondary)" }}>
+            {product.name}
+          </span>
         </div>
 
-        <div className="product-detail-layout card-pad-lg" style={{ background: 'var(--bg-white)', border: '1px solid var(--border)', borderRadius: '2px', marginBottom: 'var(--s9)' }}>
-          <div className="product-image-panel">
-            {product.image ? (
-              <img
-                src={product.image}
-                alt={product.name}
-                className="product-hero-img"
-              />
-            ) : (
-              <BottleSVG family={product.family} size={200} />
-            )}
-          </div>
+        <div
+          className="product-detail-layout card-pad-lg"
+          style={{
+            background: "var(--bg-white)",
+            border: "1px solid var(--border)",
+            borderRadius: "2px",
+            marginBottom: "var(--s9)",
+          }}
+        >
+          <ProductGallery
+            key={`${product._id}-${selectedSize}`}
+            product={product}
+            variation={variation}
+          />
 
           <div>
-            <div style={{ display: 'flex', gap: 'var(--s2)', marginBottom: 'var(--s4)', flexWrap: 'wrap' }}>
+            <div
+              style={{
+                display: "flex",
+                gap: "var(--s2)",
+                marginBottom: "var(--s4)",
+                flexWrap: "wrap",
+              }}
+            >
               <FamilyTag family={product.family} size="md" />
-              <span style={{ fontSize: '11px', letterSpacing: '0.1em', textTransform: 'uppercase', padding: '5px 12px', borderRadius: '999px', border: '1px solid var(--border)', color: 'var(--text-muted)' }}>
+              <span
+                style={{
+                  fontSize: "11px",
+                  letterSpacing: "0.1em",
+                  textTransform: "uppercase",
+                  padding: "5px 12px",
+                  borderRadius: "999px",
+                  border: "1px solid var(--border)",
+                  color: "var(--text-muted)",
+                }}
+              >
                 {product.category}
               </span>
             </div>
 
-            <h1 style={{ fontFamily: 'var(--serif)', fontSize: 'clamp(32px,4vw,44px)', fontWeight: 300, lineHeight: 1.1, color: 'var(--text-primary)', marginBottom: 'var(--s2)' }}>
+            <h1
+              style={{
+                fontFamily: "var(--serif)",
+                fontSize: "clamp(32px,4vw,44px)",
+                fontWeight: 300,
+                lineHeight: 1.1,
+                color: "var(--text-primary)",
+                marginBottom: "var(--s2)",
+              }}
+            >
               {product.name}
             </h1>
 
-            <p style={{ fontSize: '12px', color: 'var(--text-muted)', letterSpacing: '0.06em', marginBottom: 'var(--s5)' }}>
+            <p
+              style={{
+                fontSize: "12px",
+                color: "var(--text-muted)",
+                letterSpacing: "0.06em",
+                marginBottom: "var(--s5)",
+              }}
+            >
               Inspired by {product.inspo}
             </p>
 
-            <p style={{ fontSize: '14px', color: 'var(--text-secondary)', lineHeight: 1.75, fontWeight: 300, marginBottom: 'var(--s6)' }}>
+            <p
+              style={{
+                fontSize: "14px",
+                color: "var(--text-secondary)",
+                lineHeight: 1.75,
+                fontWeight: 300,
+                marginBottom: "var(--s6)",
+              }}
+            >
               {product.description}
             </p>
 
-            <div style={{ marginBottom: 'var(--s6)' }}>
+            <div style={{ marginBottom: "var(--s6)" }}>
               <IntensityBar value={product.intensity} />
             </div>
 
-            <div className="notes-grid" style={{ marginBottom: 'var(--s6)' }}>
+            <div className="notes-grid" style={{ marginBottom: "var(--s6)" }}>
               {[
-                ['Top Notes', product.top || []],
-                ['Heart Notes', product.heart || []],
-                ['Base Notes', product.base || []],
+                ["Top Notes", product.top || []],
+                ["Heart Notes", product.heart || []],
+                ["Base Notes", product.base || []],
               ].map(([label, notes]) => (
-                <div key={label} style={{ background: 'var(--bg)', border: '1px solid var(--border)', borderRadius: '2px', padding: 'var(--s4)', textAlign: 'center' }}>
-                  <div style={{ fontSize: '9px', letterSpacing: '0.16em', textTransform: 'uppercase', color: 'var(--accent)', marginBottom: 'var(--s3)' }}>
+                <div
+                  key={label}
+                  style={{
+                    background: "var(--bg)",
+                    border: "1px solid var(--border)",
+                    borderRadius: "2px",
+                    padding: "var(--s4)",
+                    textAlign: "center",
+                  }}
+                >
+                  <div
+                    style={{
+                      fontSize: "9px",
+                      letterSpacing: "0.16em",
+                      textTransform: "uppercase",
+                      color: "var(--accent)",
+                      marginBottom: "var(--s3)",
+                    }}
+                  >
                     {label}
                   </div>
-                  {notes.map(n => (
-                    <div key={n} style={{ fontSize: '12px', color: 'var(--text-secondary)', lineHeight: 1.6, fontWeight: 300 }}>
+                  {notes.map((n) => (
+                    <div
+                      key={n}
+                      style={{
+                        fontSize: "12px",
+                        color: "var(--text-secondary)",
+                        lineHeight: 1.6,
+                        fontWeight: 300,
+                      }}
+                    >
                       {n}
                     </div>
                   ))}
@@ -158,29 +264,55 @@ export default function ProductDetailPage() {
               ))}
             </div>
 
-            <div style={{ marginBottom: 'var(--s5)' }}>
-              <div style={{ fontSize: '10px', letterSpacing: '0.14em', textTransform: 'uppercase', color: 'var(--text-muted)', marginBottom: 'var(--s3)' }}>
-                Select Size
+            <div style={{ marginBottom: "var(--s5)" }}>
+              <div
+                style={{
+                  fontSize: "10px",
+                  letterSpacing: "0.14em",
+                  textTransform: "uppercase",
+                  color: "var(--text-muted)",
+                  marginBottom: "var(--s3)",
+                }}
+              >
+                Select variation
               </div>
-              <div style={{ display: 'flex', gap: 'var(--s2)', flexWrap: 'wrap' }}>
-                {(product.sizes || []).map(s => (
+              <div
+                style={{ display: "flex", gap: "var(--s2)", flexWrap: "wrap" }}
+              >
+                {(product.sizes || []).map((s) => (
                   <button
                     key={s.label}
                     onClick={() => setSelectedSize(s.label)}
+                    aria-pressed={selectedSize === s.label}
                     style={{
-                      padding: 'var(--s2) var(--s4)',
-                      background: selectedSize === s.label ? 'var(--accent-light)' : 'transparent',
-                      border: `1px solid ${selectedSize === s.label ? 'var(--accent)' : 'var(--border)'}`,
-                      color: selectedSize === s.label ? 'var(--accent-dark)' : 'var(--text-secondary)',
-                      borderRadius: '2px',
-                      cursor: 'pointer',
-                      fontFamily: 'var(--sans)',
-                      fontSize: '12px',
-                      transition: 'all var(--fast)',
+                      padding: "var(--s2) var(--s4)",
+                      background:
+                        selectedSize === s.label
+                          ? "var(--accent-light)"
+                          : "transparent",
+                      border: `1px solid ${selectedSize === s.label ? "var(--accent)" : "var(--border)"}`,
+                      color:
+                        selectedSize === s.label
+                          ? "var(--accent-dark)"
+                          : "var(--text-secondary)",
+                      borderRadius: "2px",
+                      cursor: "pointer",
+                      fontFamily: "var(--sans)",
+                      fontSize: "12px",
+                      transition: "all var(--fast)",
                     }}
                   >
-                    <div style={{ fontWeight: 400 }}>{s.label}</div>
-                    <div style={{ fontSize: '10px', opacity: 0.75, marginTop: '2px' }}>
+                    <div style={{ fontWeight: 400 }}>
+                      {s.label}
+                      {s.inStock === false ? " · Sold out" : ""}
+                    </div>
+                    <div
+                      style={{
+                        fontSize: "10px",
+                        opacity: 0.75,
+                        marginTop: "2px",
+                      }}
+                    >
                       PKR {s.price.toLocaleString()}
                     </div>
                   </button>
@@ -188,32 +320,136 @@ export default function ProductDetailPage() {
               </div>
             </div>
 
-            <div className="qty-price-row" style={{ marginBottom: 'var(--s5)' }}>
-              <div style={{ display: 'flex', alignItems: 'center', border: '1px solid var(--border)', borderRadius: '2px' }}>
-                <button onClick={() => setQty(q => Math.max(1, q - 1))} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', width: '38px', height: '38px', fontSize: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>−</button>
-                <span style={{ width: '36px', textAlign: 'center', fontSize: '14px', color: 'var(--text-primary)' }}>{qty}</span>
-                <button onClick={() => setQty(q => q + 1)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', width: '38px', height: '38px', fontSize: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>+</button>
+            <div
+              className="qty-price-row"
+              style={{ marginBottom: "var(--s5)" }}
+            >
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  border: "1px solid var(--border)",
+                  borderRadius: "2px",
+                }}
+              >
+                <button
+                  onClick={() => setQty((q) => Math.max(1, q - 1))}
+                  style={{
+                    background: "none",
+                    border: "none",
+                    cursor: "pointer",
+                    color: "var(--text-muted)",
+                    width: "38px",
+                    height: "38px",
+                    fontSize: "16px",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                  }}
+                >
+                  −
+                </button>
+                <span
+                  style={{
+                    width: "36px",
+                    textAlign: "center",
+                    fontSize: "14px",
+                    color: "var(--text-primary)",
+                  }}
+                >
+                  {qty}
+                </span>
+                <button
+                  onClick={() => setQty((q) => q + 1)}
+                  style={{
+                    background: "none",
+                    border: "none",
+                    cursor: "pointer",
+                    color: "var(--text-muted)",
+                    width: "38px",
+                    height: "38px",
+                    fontSize: "16px",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                  }}
+                >
+                  +
+                </button>
               </div>
 
-              <div style={{ fontFamily: 'var(--serif)', fontSize: '28px', fontWeight: 300, color: 'var(--text-primary)' }}>
+              <div
+                style={{
+                  fontFamily: "var(--serif)",
+                  fontSize: "28px",
+                  fontWeight: 300,
+                  color: "var(--text-primary)",
+                }}
+              >
                 PKR {(currentPrice * qty).toLocaleString()}
               </div>
             </div>
 
-            <div style={{ display: 'flex', gap: 'var(--s3)' }}>
-              <Button fullWidth onClick={handleAdd} disabled={!product.inStock} variant={added ? 'accent' : 'primary'}>
-                {!product.inStock ? 'Out of stock' : added ? '✓ Added to Cart' : 'Add to Cart'}
+            <div style={{ display: "flex", gap: "var(--s3)" }}>
+              <Button
+                fullWidth
+                onClick={handleAdd}
+                disabled={!available}
+                variant={added ? "accent" : "primary"}
+              >
+                {!available
+                  ? "Out of stock"
+                  : added
+                    ? "✓ Added to Cart"
+                    : "Add to Cart"}
               </Button>
 
-              <button style={{ width: '48px', flexShrink: 0, background: 'transparent', border: '1px solid var(--border)', borderRadius: '2px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-muted)', transition: 'all var(--fast)' }}>
+              <button
+                style={{
+                  width: "48px",
+                  flexShrink: 0,
+                  background: "transparent",
+                  border: "1px solid var(--border)",
+                  borderRadius: "2px",
+                  cursor: "pointer",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  color: "var(--text-muted)",
+                  transition: "all var(--fast)",
+                }}
+              >
                 <HeartIcon size={16} />
               </button>
             </div>
 
-            <div style={{ display: 'flex', gap: 'var(--s5)', marginTop: 'var(--s5)', paddingTop: 'var(--s5)', borderTop: '1px solid var(--border-soft)', flexWrap: 'wrap' }}>
-              {['Free shipping on orders over PKR 3,000', 'Authentic ingredients', '30-day returns'].map(t => (
-                <span key={t} style={{ fontSize: '10px', color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: '5px' }}>
-                  <span style={{ color: '#286858', fontSize: '12px' }}>✓</span> {t}
+            <div
+              style={{
+                display: "flex",
+                gap: "var(--s5)",
+                marginTop: "var(--s5)",
+                paddingTop: "var(--s5)",
+                borderTop: "1px solid var(--border-soft)",
+                flexWrap: "wrap",
+              }}
+            >
+              {[
+                "Free shipping on orders over PKR 3,000",
+                "Authentic ingredients",
+                "30-day returns",
+              ].map((t) => (
+                <span
+                  key={t}
+                  style={{
+                    fontSize: "10px",
+                    color: "var(--text-muted)",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "5px",
+                  }}
+                >
+                  <span style={{ color: "#286858", fontSize: "12px" }}>✓</span>{" "}
+                  {t}
                 </span>
               ))}
             </div>
@@ -221,13 +457,13 @@ export default function ProductDetailPage() {
         </div>
 
         {related.length > 0 && (
-          <div style={{ marginBottom: 'var(--s9)' }}>
+          <div style={{ marginBottom: "var(--s9)" }}>
             <p className="section-eyebrow">Related</p>
-            <h2 className="section-title" style={{ marginBottom: 'var(--s7)' }}>
+            <h2 className="section-title" style={{ marginBottom: "var(--s7)" }}>
               You Might Also Love
             </h2>
             <div className="grid-cols-4">
-              {related.map(p => (
+              {related.map((p) => (
                 <ProductCard key={p._id} product={p} />
               ))}
             </div>
@@ -237,4 +473,3 @@ export default function ProductDetailPage() {
     </div>
   );
 }
-

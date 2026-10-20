@@ -18,6 +18,8 @@ const navigation = [
   ["", "Overview", "◫"],
   ["products", "Products", "◇"],
   ["categories", "Categories", "▤"],
+  ["scent-families", "Scent families", "❋"],
+  ["moods", "Moods", "☼"],
   ["gift-packs", "Gift packs", "◈"],
   ["coupons", "Promo codes", "%"],
   ["orders", "Shop orders", "▧"],
@@ -245,7 +247,12 @@ function useRecords(endpoint) {
 }
 function ResourcePage({ config, orders = false }) {
   const { data, loading, error, refresh } = useRecords(config.endpoint);
-  const [categories, setCategories] = useState([]);
+  const [catalogOptions, setCatalogOptions] = useState({
+    category: [],
+    family: [],
+    mood: [],
+  });
+  const [optionsError, setOptionsError] = useState("");
   const [search, setSearch] = useState(""),
     [filter, setFilter] = useState("all"),
     [page, setPage] = useState(1);
@@ -256,10 +263,23 @@ function ResourcePage({ config, orders = false }) {
     [notice, setNotice] = useState("");
   useEffect(() => {
     if (config.endpoint === "/products")
-      adminApi
-        .get("/categories")
-        .then((r) => setCategories(r.data.data))
-        .catch(() => {});
+      Promise.all(
+        ["/categories", "/scent-families", "/moods"].map((path) =>
+          adminApi.get(path),
+        ),
+      )
+        .then((results) => {
+          setCatalogOptions(
+            Object.fromEntries(
+              ["category", "family", "mood"].map((key, i) => [
+                key,
+                results[i].data.data,
+              ]),
+            ),
+          );
+          setOptionsError("");
+        })
+        .catch((error) => setOptionsError(errorMessage(error)));
   }, [config.endpoint]);
   const filtered = data.filter((item) => {
     const text = orders
@@ -333,6 +353,12 @@ function ResourcePage({ config, orders = false }) {
           </button>
         )}
       </Header>
+      {optionsError && (
+        <p className="adm-alert" role="alert">
+          Could not load product options. {optionsError} Refresh this page to
+          retry.
+        </p>
+      )}
       {notice && (
         <div className="adm-notice" role="status">
           {notice}
@@ -368,7 +394,7 @@ function ResourcePage({ config, orders = false }) {
               setPage(1);
             }}
           />
-          {(orders || config.endpoint !== "/categories") && (
+          {(orders || !config.taxonomy) && (
             <select
               aria-label="Filter records"
               value={filter}
@@ -452,15 +478,13 @@ function ResourcePage({ config, orders = false }) {
                   <th>
                     {orders
                       ? "Amount"
-                      : config.endpoint === "/categories"
+                      : config.taxonomy
                         ? "Display order"
                         : config.endpoint === "/coupons"
                           ? "Usage"
                           : "Price"}
                   </th>
-                  <th>
-                    {config.endpoint === "/categories" ? "Shop link" : "Status"}
-                  </th>
+                  <th>{config.taxonomy ? "Shop link" : "Status"}</th>
                   <th>
                     <span className="adm-sr">Actions</span>
                   </th>
@@ -519,7 +543,7 @@ function ResourcePage({ config, orders = false }) {
                     <td>
                       {orders ? (
                         money(item.total ?? item.price)
-                      ) : config.endpoint === "/categories" ? (
+                      ) : config.taxonomy ? (
                         item.displayOrder
                       ) : config.endpoint === "/coupons" ? (
                         `${item.usedCount} / ${item.usageLimit ?? "Unlimited"}`
@@ -538,10 +562,14 @@ function ResourcePage({ config, orders = false }) {
                     <td>
                       {orders ? (
                         <Status value={item.status} />
-                      ) : config.endpoint === "/categories" ? (
+                      ) : config.taxonomy ? (
                         <a
                           className="adm-link"
-                          href={`/shop/${item.slug}`}
+                          href={
+                            config.taxonomy === "category"
+                              ? `/shop/${item.slug}`
+                              : `/shop?${config.taxonomy}=${encodeURIComponent(item.name)}`
+                          }
                           target="_blank"
                           rel="noreferrer"
                         >
@@ -622,7 +650,7 @@ function ResourcePage({ config, orders = false }) {
           <Editor
             config={config}
             item={editing}
-            categories={categories}
+            catalogOptions={catalogOptions}
             onClose={() => setEditing(null)}
             onSaved={saved}
           />

@@ -25,7 +25,22 @@ export const useCartStore = create(
           const price = sizeObj?.price ?? product.price ?? 0;
 
           return {
-            items: [...state.items, { ...product, key, size, qty, price }],
+            items: [
+              ...state.items,
+              {
+                ...product,
+                key,
+                size,
+                qty,
+                price,
+                image:
+                  sizeObj?.images?.[0] ||
+                  product.images?.[0] ||
+                  product.image ||
+                  "",
+                sku: sizeObj?.sku || "",
+              },
+            ],
           };
         });
       },

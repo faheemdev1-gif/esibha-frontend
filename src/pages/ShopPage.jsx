@@ -1,310 +1,288 @@
-import { useState, useMemo, useEffect } from "react";
-import { Link, useParams, useSearchParams } from "react-router-dom";
+import { useEffect, useRef, useState } from "react";
+import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { useCategories } from "../api/storeConfig";
 import ProductCard from "../components/shop/ProductCard";
 import ShopFilters from "../components/shop/ShopFilters";
+import { filterProducts, MULTI_FILTERS, readFilters } from "../utils/catalog";
 import api from "../api/api";
-
-const SORT_OPTIONS = [
-  { value: "default", label: "Bestselling" },
-  { value: "new", label: "New Arrivals" },
-  { value: "price-asc", label: "Price: Low – High" },
-  { value: "price-desc", label: "Price: High – Low" },
-];
+import "../components/shop/catalog.css";
 
 export default function ShopPage() {
   const { category } = useParams();
-  const [searchParams] = useSearchParams();
+  const [params] = useSearchParams();
+  const navigate = useNavigate();
   const categories = useCategories();
-  const requestedMood = searchParams.get("mood");
-  const selectedMood = requestedMood === "Luxury" ? "Luxurious" : requestedMood;
-  const moodLabel = selectedMood === "Luxurious" ? "Luxury" : selectedMood;
-  const clearMoodParams = new URLSearchParams(searchParams);
-  clearMoodParams.delete("mood");
-  const clearMoodUrl = `${category ? `/shop/${category}` : "/shop"}${clearMoodParams.size ? `?${clearMoodParams}` : ""}`;
-
-  const [allProducts, setAllProducts] = useState([]);
-  const [loading, setLoading] = useState(true);
-
-  const [filters, setFilters] = useState({
-    family: "All",
-    intensity: [],
-    sizes: [],
+  const routeCategory = category
+    ? categories.find((item) => item.slug === category)?.name || category
+    : null;
+  const filters = readFilters(params, routeCategory);
+  const sort = params.get("sort") || "default";
+  const [catalog, setCatalog] = useState({
+    products: [],
+    family: [],
+    mood: [],
   });
-
-  const [sort, setSort] = useState("default");
-
-  const catLabel = category
-    ? categories.find((c) => c.slug === category)?.name || category
-    : searchParams.get("category") || null;
-
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [attempt, setAttempt] = useState(0);
+  const dialog = useRef(null);
   useEffect(() => {
-    const fetchProducts = async () => {
-      try {
-        const res = await api.get("/products");
-        setAllProducts(res.data.data || []);
-      } catch (error) {
-        console.error("Failed to fetch products:", error);
-      } finally {
-        setLoading(false);
-      }
+    let active = true;
+    Promise.all(
+      ["/products", "/scent-families", "/moods"].map((path) => api.get(path)),
+    )
+      .then((results) => {
+        if (active) {
+          setCatalog({
+            products: results[0].data.data,
+            family: results[1].data.data,
+            mood: results[2].data.data,
+          });
+          setError("");
+        }
+      })
+      .catch(() => {
+        if (active)
+          setError("We couldn’t load the collection. Please try again.");
+      })
+      .finally(() => {
+        if (active) setLoading(false);
+      });
+    return () => {
+      active = false;
     };
-
-    fetchProducts();
-  }, []);
-
-  const products = useMemo(() => {
-    let list = [...allProducts];
-
-    if (catLabel) {
-      list = list.filter((p) => p.category === catLabel);
-    }
-
-    if (selectedMood) {
-      list = list.filter((p) => p.mood === selectedMood);
-    }
-
-    if (filters.family !== "All") {
-      list = list.filter((p) => p.family === filters.family);
-    }
-
-    if (filters.intensity?.length) {
-      const intensityMap = {
-        Light: [0, 40],
-        Moderate: [40, 65],
-        Strong: [65, 82],
-        "Very Strong": [82, 101],
-      };
-
-      list = list.filter((p) =>
-        filters.intensity.some((i) => {
-          const [min, max] = intensityMap[i] || [0, 101];
-          return p.intensity >= min && p.intensity < max;
-        }),
-      );
-    }
-
-    if (filters.sizes?.length) {
-      list = list.filter((p) =>
-        p.sizes?.some((s) => filters.sizes.includes(s.label)),
-      );
-    }
-
-    if (sort === "price-asc") {
-      list.sort(
-        (a, b) => (a.sizes?.[0]?.price || 0) - (b.sizes?.[0]?.price || 0),
-      );
-    }
-
-    if (sort === "price-desc") {
-      list.sort(
-        (a, b) => (b.sizes?.[0]?.price || 0) - (a.sizes?.[0]?.price || 0),
-      );
-    }
-
-    if (sort === "new") {
-      list.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-    }
-
-    if (sort === "default") {
-      list.sort(
-        (a, b) =>
-          (a.displayOrder || 0) - (b.displayOrder || 0) ||
-          (b.bestseller ? 1 : 0) - (a.bestseller ? 1 : 0),
-      );
-    }
-
-    return list;
-  }, [allProducts, catLabel, selectedMood, filters, sort]);
-
-  const pageTitle = catLabel
-    ? `${catLabel}${moodLabel ? ` · ${moodLabel}` : ""}`
-    : moodLabel
-      ? `${moodLabel} Fragrances`
-      : "All Fragrances";
-
-  if (loading) {
-    return (
-      <div style={{ padding: "120px 40px", textAlign: "center" }}>
-        Loading products...
-      </div>
-    );
-  }
-
+  }, [attempt]);
+  const update = (patch, replace = false, requestedSort) => {
+    // Read the latest URL inside the event so rapid changes compose even while
+    // React Router is still rendering the previous navigation.
+    const currentParams = new URLSearchParams(window.location.search);
+    const currentSlug = window.location.pathname.startsWith("/shop/")
+      ? window.location.pathname.split("/")[2]
+      : null;
+    const currentCategory = currentSlug
+      ? categories.find((item) => item.slug === currentSlug)?.name ||
+        currentSlug
+      : null;
+    const current = readFilters(currentParams, currentCategory);
+    const next =
+      typeof patch === "function" ? patch(current) : { ...current, ...patch };
+    const nextSort = requestedSort ?? currentParams.get("sort") ?? "default";
+    const query = new URLSearchParams();
+    for (const key of MULTI_FILTERS)
+      next[key].forEach((value) => query.append(key, value));
+    for (const key of ["q", "min", "max"])
+      if (next[key] !== "") query.set(key, next[key]);
+    if (next.stock) query.set("stock", "true");
+    if (nextSort !== "default") query.set("sort", nextSort);
+    navigate(`/shop${query.size ? `?${query}` : ""}`, {
+      replace,
+      preventScrollReset: true,
+    });
+  };
+  const reset = () => update(readFilters(new URLSearchParams()), false, sort);
+  const options = {
+    category: [
+      ...new Set([
+        ...categories.map((item) => item.name),
+        ...catalog.products.map((item) => item.category),
+      ]),
+    ],
+    family: [
+      ...new Set([
+        ...catalog.family.map((item) => item.name),
+        ...catalog.products.map((item) => item.family),
+      ]),
+    ],
+    mood: [
+      ...new Set([
+        ...catalog.mood.map((item) => item.name),
+        ...catalog.products.map((item) => item.mood),
+      ]),
+    ].filter(Boolean),
+    size: [
+      ...new Set(
+        catalog.products.flatMap((item) =>
+          item.sizes.map((size) => size.label),
+        ),
+      ),
+    ].sort((a, b) => a.localeCompare(b, undefined, { numeric: true })),
+  };
+  const products = filterProducts(catalog.products, filters, sort);
+  const chips = MULTI_FILTERS.flatMap((key) =>
+    filters[key].map((value) => ({ key, value, label: value })),
+  );
+  if (filters.q) chips.push({ key: "q", label: `Search: ${filters.q}` });
+  if (filters.min !== "")
+    chips.push({
+      key: "min",
+      label: `From PKR ${Number(filters.min).toLocaleString()}`,
+    });
+  if (filters.max !== "")
+    chips.push({
+      key: "max",
+      label: `To PKR ${Number(filters.max).toLocaleString()}`,
+    });
+  if (filters.stock) chips.push({ key: "stock", label: "In stock" });
+  const panel = (
+    <ShopFilters
+      filters={filters}
+      onChange={update}
+      options={options}
+      products={catalog.products}
+      onReset={reset}
+    />
+  );
   return (
-    <div style={{ paddingTop: "var(--nav-h)" }}>
-      <div
-        style={{
-          background: "var(--bg-white)",
-          borderBottom: "1px solid var(--border)",
-          padding: "var(--s7) var(--s7) var(--s5)",
-        }}
-      >
-        <div className="container" style={{ padding: 0 }}>
-          <p className="section-eyebrow">Collection</p>
-
-          <div
-            style={{
-              display: "flex",
-              alignItems: "flex-end",
-              justifyContent: "space-between",
-              flexWrap: "wrap",
-              gap: "var(--s4)",
-            }}
+    <div className="catalog-page">
+      <header className="catalog-header">
+        <div className="container">
+          <p className="section-eyebrow">The eSibha collection</p>
+          <h1>{routeCategory || "Find your signature scent"}</h1>
+          <p>
+            Explore by family, mood, and the details that make a fragrance
+            yours.
+          </p>
+          <form
+            className="catalog-search"
+            onSubmit={(event) => event.preventDefault()}
+            role="search"
           >
-            <h1
-              style={{
-                fontFamily: "var(--serif)",
-                fontSize: "clamp(32px,5vw,52px)",
-                fontWeight: 300,
-                color: "var(--text-primary)",
-              }}
+            <label htmlFor="catalog-search">Search fragrances</label>
+            <div>
+              <input
+                id="catalog-search"
+                type="search"
+                placeholder="Search a fragrance, note, or inspiration…"
+                value={filters.q}
+                onChange={(event) => update({ q: event.target.value }, true)}
+              />
+              <span aria-hidden="true">⌕</span>
+            </div>
+          </form>
+        </div>
+      </header>
+      <div className="container catalog-body">
+        <div className="catalog-toolbar">
+          <p aria-live="polite">
+            {loading
+              ? "Loading collection…"
+              : `${products.length} ${products.length === 1 ? "fragrance" : "fragrances"}`}
+          </p>
+          <div>
+            <button
+              className="catalog-mobile-trigger"
+              onClick={() => dialog.current.showModal()}
             >
-              {pageTitle}
-            </h1>
-
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: "var(--s3)",
-              }}
-            >
-              <span
-                style={{
-                  fontSize: "11px",
-                  color: "var(--text-muted)",
-                  letterSpacing: "0.08em",
-                }}
-              >
-                {products.length} fragrances
-              </span>
-
+              Filters {chips.length > 0 && `(${chips.length})`}
+            </button>
+            <label>
+              Sort by{" "}
               <select
+                aria-label="Sort fragrances"
                 value={sort}
-                onChange={(e) => setSort(e.target.value)}
-                style={{
-                  background: "var(--bg)",
-                  border: "1px solid var(--border)",
-                  color: "var(--text-secondary)",
-                  padding: "8px 14px",
-                  borderRadius: "2px",
-                  fontSize: "11px",
-                  letterSpacing: "0.06em",
-                  fontFamily: "var(--sans)",
-                  outline: "none",
-                  cursor: "pointer",
-                }}
+                onChange={(event) => update({}, false, event.target.value)}
               >
-                {SORT_OPTIONS.map((o) => (
-                  <option key={o.value} value={o.value}>
-                    {o.label}
-                  </option>
-                ))}
+                <option value="default">Recommended</option>
+                <option value="new">Newest arrivals</option>
+                <option value="price-asc">Price: low to high</option>
+                <option value="price-desc">Price: high to low</option>
               </select>
-            </div>
-          </div>
-
-          {selectedMood && (
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: 14,
-                marginTop: 20,
-                flexWrap: "wrap",
-              }}
-            >
-              <span style={{ fontSize: 13, color: "var(--text-secondary)" }}>
-                Selected mood: {moodLabel}
-              </span>
-              <Link
-                to={clearMoodUrl}
-                aria-label="Clear mood filter"
-                style={{
-                  fontSize: 12,
-                  color: "var(--accent)",
-                  textDecoration: "underline",
-                  textUnderlineOffset: 3,
-                }}
-              >
-                Clear mood ×
-              </Link>
-            </div>
-          )}
-
-          <div
-            style={{
-              display: "flex",
-              gap: "var(--s3)",
-              marginTop: "var(--s5)",
-              flexWrap: "wrap",
-            }}
-          >
-            {[
-              ["All", "/shop"],
-              ...categories.map((c) => [c.name, `/shop/${c.slug}`]),
-            ].map(([label, href]) => (
-              <a
-                key={href}
-                href={href}
-                style={{
-                  fontSize: "11px",
-                  letterSpacing: "0.12em",
-                  textTransform: "uppercase",
-                  padding: "5px 14px",
-                  borderRadius: "999px",
-                  border: `1px solid ${(!category && label === "All") || catLabel === label ? "var(--accent)" : "var(--border)"}`,
-                  color:
-                    (!category && label === "All") || catLabel === label
-                      ? "var(--accent)"
-                      : "var(--text-muted)",
-                  background:
-                    (!category && label === "All") || catLabel === label
-                      ? "var(--accent-light)"
-                      : "transparent",
-                  textDecoration: "none",
-                  transition: "all var(--fast)",
-                }}
-              >
-                {label}
-              </a>
-            ))}
+            </label>
           </div>
         </div>
-      </div>
-
-      <div className="container" style={{ padding: "var(--s7)" }}>
-        <div className="shop-layout">
-          <ShopFilters filters={filters} onChange={setFilters} />
-
-          <div>
-            {products.length === 0 ? (
-              <div style={{ textAlign: "center", paddingTop: "var(--s10)" }}>
-                <p
-                  style={{
-                    fontFamily: "var(--serif)",
-                    fontSize: "26px",
-                    color: "var(--text-muted)",
-                    marginBottom: "var(--s3)",
+        {chips.length > 0 && (
+          <div className="catalog-chips" aria-label="Active filters">
+            {chips.map((chip) => (
+              <button
+                key={`${chip.key}-${chip.value || ""}`}
+                aria-label={`Remove ${chip.label} filter`}
+                onClick={() =>
+                  update((current) => ({
+                    ...current,
+                    [chip.key]: MULTI_FILTERS.includes(chip.key)
+                      ? current[chip.key].filter(
+                          (value) => value !== chip.value,
+                        )
+                      : chip.key === "stock"
+                        ? false
+                        : "",
+                  }))
+                }
+              >
+                {chip.label} <span>×</span>
+              </button>
+            ))}
+            <button className="catalog-clear" onClick={reset}>
+              Clear all
+            </button>
+          </div>
+        )}
+        <div className="catalog-layout">
+          <aside className="catalog-desktop-filters" aria-label="Shop filters">
+            {panel}
+          </aside>
+          <main aria-label="Fragrance results" aria-busy={loading}>
+            {loading ? (
+              <div className="catalog-empty" role="status">
+                Gathering your fragrances…
+              </div>
+            ) : error ? (
+              <div className="catalog-empty" role="alert">
+                <h2>Collection unavailable</h2>
+                <p>{error}</p>
+                <button
+                  onClick={() => {
+                    setLoading(true);
+                    setAttempt((value) => value + 1);
                   }}
                 >
-                  No results
-                </p>
-                <p style={{ fontSize: "13px", color: "var(--text-muted)" }}>
-                  Try adjusting your filters.
-                </p>
+                  Try again
+                </button>
               </div>
-            ) : (
+            ) : products.length ? (
               <div className="product-grid">
-                {products.map((p) => (
-                  <ProductCard key={p._id} product={p} />
+                {products.map((product) => (
+                  <ProductCard
+                    key={`${product._id}-${product.shopSizes.map((size) => size.label).join("|")}`}
+                    product={product}
+                  />
                 ))}
               </div>
+            ) : (
+              <div className="catalog-empty">
+                <span>◇</span>
+                <h2>No fragrances found</h2>
+                <p>
+                  Try a different price range or remove a filter to explore more
+                  scents.
+                </p>
+                <button onClick={reset}>Clear filters</button>
+              </div>
             )}
-          </div>
+          </main>
         </div>
       </div>
+      <dialog
+        ref={dialog}
+        className="catalog-filter-dialog"
+        aria-label="Filter fragrances"
+      >
+        <div className="catalog-dialog-top">
+          <strong>Filters</strong>
+          <button
+            aria-label="Close filters"
+            onClick={() => dialog.current.close()}
+          >
+            ×
+          </button>
+        </div>
+        {panel}
+        <div className="catalog-dialog-footer">
+          <button onClick={() => dialog.current.close()}>
+            Show {products.length} fragrances
+          </button>
+        </div>
+      </dialog>
     </div>
   );
 }

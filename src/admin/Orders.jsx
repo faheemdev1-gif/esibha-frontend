@@ -61,6 +61,7 @@ export default function OrderDetails({ item, config, onClose, onSaved }) {
                     <strong>{i.name}</strong>
                     <p>
                       {i.size} × {i.qty} · {money(i.price)} each
+                      {i.sku ? ` · SKU ${i.sku}` : ""}
                     </p>
                     {i.wrap && <p>Wrapping: {i.wrap}</p>}
                     {i.giftMessage && <p>Gift message: {i.giftMessage}</p>}

@@ -22,13 +22,13 @@ export const resources = {
       name: "",
       slug: "",
       category: "",
-      family: FAMILIES[0],
+      family: "",
       inspo: "eSibha Original",
-      mood: "Fresh",
+      mood: "",
       intensity: 70,
       description: "",
       sizes: [{ label: "30ml", price: 0 }],
-      image: "",
+      images: [],
       top: [],
       heart: [],
       base: [],
@@ -45,18 +45,12 @@ export const resources = {
       ["name", "Product name", "text", true],
       ["slug", "URL slug", "slug", true],
       ["category", "Category", "category", true],
-      ["family", "Scent family", "select", true, FAMILIES],
+      ["family", "Scent family", "taxonomy", true],
       ["inspo", "Inspired by", "text"],
-      [
-        "mood",
-        "Mood",
-        "select",
-        true,
-        ["Fresh", "Romantic", "Bold", "Luxurious", "Night"],
-      ],
+      ["mood", "Mood", "taxonomy", true],
       ["description", "Description", "textarea", true],
-      ["image", "Product image", "image"],
-      ["sizes", "Sizes and prices (PKR)", "sizes"],
+      ["images", "Product photos", "images"],
+      ["sizes", "Variations and prices (PKR)", "sizes"],
       ["intensity", "Intensity (0–100)", "number", true, 100],
       ["displayOrder", "Display order", "number"],
       ["top", "Top notes", "list"],
@@ -72,6 +66,7 @@ export const resources = {
     ],
   },
   categories: {
+    taxonomy: "category",
     title: "Categories",
     singular: "category",
     endpoint: "/categories",
@@ -132,6 +127,28 @@ export const resources = {
     ],
   },
 };
+for (const [key, title, singular, field] of [
+  ["scent-families", "Scent families", "scent family", "family"],
+  ["moods", "Moods", "mood", "mood"],
+])
+  resources[key] = {
+    ...resources.categories,
+    title,
+    singular,
+    endpoint: `/${key}`,
+    taxonomy: field,
+    description: `Create and arrange ${title.toLowerCase()} for products and shop filters.`,
+    fields: resources.categories.fields.map((row) =>
+      row[0] === "name"
+        ? [
+            "name",
+            `${singular[0].toUpperCase() + singular.slice(1)} name`,
+            "text",
+            true,
+          ]
+        : row,
+    ),
+  };
 export const money = (value) => `PKR ${Number(value || 0).toLocaleString()}`;
 export const errorMessage = (error) =>
   error.response?.data?.message ||

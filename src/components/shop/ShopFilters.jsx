@@ -1,116 +1,102 @@
-const FAMILIES = ['All','Fresh & Citrus','Floral','Oud & Amber','Woody & Oriental','Musk'];
-const INTENSITIES = [{ label: 'Light', max: 40 }, { label: 'Moderate', min: 40, max: 65 }, { label: 'Strong', min: 65, max: 82 }, { label: 'Very Strong', min: 82 }];
-const SIZES = ['5ml','30ml','50ml','100ml'];
-
-export default function ShopFilters({ filters, onChange }) {
-  const set = (key, val) => onChange({ ...filters, [key]: val });
-
+import { INTENSITIES, matchesProduct } from "../../utils/catalog";
+export default function ShopFilters({
+  filters,
+  onChange,
+  options,
+  products,
+  onReset,
+}) {
+  const toggle = (key, value) =>
+    onChange((current) => ({
+      ...current,
+      [key]: current[key].includes(value)
+        ? current[key].filter((item) => item !== value)
+        : [...current[key], value],
+    }));
   return (
-    <aside className="shop-filters">
-      <div style={{ fontSize: '11px', fontWeight: 500, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'var(--text-primary)', marginBottom: 'var(--s5)', paddingBottom: 'var(--s4)', borderBottom: '1px solid var(--border)' }}>
-        Filters
+    <div className="catalog-filter-panel">
+      <div className="catalog-filter-heading">
+        <h2>Refine your search</h2>
+        <button onClick={onReset}>Reset all</button>
       </div>
-
-      {/* Scent Family */}
-      <FilterSection title="Scent Family">
-        {FAMILIES.map(f => (
-          <FilterPill key={f} label={f} active={filters.family === f} onClick={() => set('family', f)} />
-        ))}
-      </FilterSection>
-
-      {/* Intensity */}
-      <FilterSection title="Intensity">
-        {INTENSITIES.map(({ label }) => (
-          <FilterCheckbox key={label} label={label} checked={filters.intensity?.includes(label)} onChange={v => {
-            const cur = filters.intensity || [];
-            set('intensity', v ? [...cur, label] : cur.filter(i => i !== label));
-          }} />
-        ))}
-      </FilterSection>
-
-      {/* Size */}
-      <FilterSection title="Size" last>
-        <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
-          {SIZES.map(s => (
-            <SizeChip key={s} label={s}
-              active={(filters.sizes || []).includes(s)}
-              onClick={() => {
-                const cur = filters.sizes || [];
-                set('sizes', cur.includes(s) ? cur.filter(x => x !== s) : [...cur, s]);
-              }}
+      {[
+        ["category", "Category"],
+        ["family", "Scent family"],
+        ["mood", "Mood"],
+        ["size", "Size / variation"],
+        ["intensity", "Intensity"],
+      ].map(([key, title]) => (
+        <fieldset key={key} className="catalog-filter-group">
+          <legend>{title}</legend>
+          <div className="catalog-filter-options">
+            {(key === "intensity"
+              ? Object.keys(INTENSITIES)
+              : options[key] || []
+            ).map((value) => {
+              const count = products.filter((product) =>
+                matchesProduct(product, { ...filters, [key]: [value] }),
+              ).length;
+              return (
+                <label key={value}>
+                  <input
+                    type="checkbox"
+                    checked={filters[key].includes(value)}
+                    onChange={() => toggle(key, value)}
+                  />
+                  <span>{value}</span>
+                  <small>{count}</small>
+                </label>
+              );
+            })}
+            {key !== "intensity" && !options[key]?.length && (
+              <small>No options yet</small>
+            )}
+          </div>
+        </fieldset>
+      ))}
+      <fieldset className="catalog-filter-group">
+        <legend>Price range (PKR)</legend>
+        <div className="catalog-price-inputs">
+          <label>
+            From
+            <input
+              aria-label="Minimum price"
+              inputMode="decimal"
+              type="number"
+              min="0"
+              placeholder="0"
+              value={filters.min}
+              onChange={(event) => onChange({ min: event.target.value }, true)}
             />
-          ))}
+          </label>
+          <span>—</span>
+          <label>
+            To
+            <input
+              aria-label="Maximum price"
+              inputMode="decimal"
+              type="number"
+              min="0"
+              placeholder="Any"
+              value={filters.max}
+              onChange={(event) => onChange({ max: event.target.value }, true)}
+            />
+          </label>
         </div>
-      </FilterSection>
-
-      {/* Reset */}
-      <button onClick={() => onChange({ family: 'All', intensity: [], sizes: [] })} style={{
-        marginTop: 'var(--s4)', width: '100%', padding: '9px',
-        background: 'none', border: '1px solid var(--border)',
-        color: 'var(--text-muted)', fontSize: '10px', letterSpacing: '0.14em',
-        textTransform: 'uppercase', borderRadius: '2px', cursor: 'pointer',
-        fontFamily: 'var(--sans)',
-        transition: 'all var(--fast)',
-      }}
-        onMouseEnter={e => { e.currentTarget.style.borderColor = 'var(--accent)'; e.currentTarget.style.color = 'var(--accent)'; }}
-        onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--border)'; e.currentTarget.style.color = 'var(--text-muted)'; }}
-      >
-        Reset Filters
-      </button>
-    </aside>
-  );
-}
-
-function FilterSection({ title, children, last = false }) {
-  return (
-    <div style={{ marginBottom: last ? 0 : 'var(--s5)', paddingBottom: last ? 0 : 'var(--s5)', borderBottom: last ? 'none' : '1px solid var(--border-soft)' }}>
-      <div style={{ fontSize: '10px', letterSpacing: '0.16em', textTransform: 'uppercase', color: 'var(--text-muted)', marginBottom: 'var(--s3)' }}>
-        {title}
-      </div>
-      {children}
+        {filters.min !== "" &&
+          filters.max !== "" &&
+          Number(filters.min) > Number(filters.max) && (
+            <small role="status">The minimum is higher than the maximum.</small>
+          )}
+      </fieldset>
+      <label className="catalog-stock">
+        <input
+          type="checkbox"
+          checked={filters.stock}
+          onChange={(event) => onChange({ stock: event.target.checked })}
+        />
+        In stock only
+      </label>
     </div>
-  );
-}
-
-function FilterPill({ label, active, onClick }) {
-  return (
-    <button onClick={onClick} style={{
-      display: 'block', width: '100%', textAlign: 'left',
-      padding: '7px 10px', marginBottom: '4px',
-      background: active ? 'var(--accent-light)' : 'transparent',
-      border: `1px solid ${active ? 'var(--accent)' : 'transparent'}`,
-      borderRadius: '2px',
-      color: active ? 'var(--accent-dark)' : 'var(--text-secondary)',
-      fontSize: '13px', fontFamily: 'var(--sans)', cursor: 'pointer',
-      transition: 'all var(--fast)',
-    }}>
-      {label}
-    </button>
-  );
-}
-
-function FilterCheckbox({ label, checked, onChange }) {
-  return (
-    <label style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px', cursor: 'pointer' }}>
-      <input type="checkbox" checked={checked || false} onChange={e => onChange(e.target.checked)}
-        style={{ accentColor: 'var(--accent)', width: '13px', height: '13px' }} />
-      <span style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>{label}</span>
-    </label>
-  );
-}
-
-function SizeChip({ label, active, onClick }) {
-  return (
-    <button onClick={onClick} style={{
-      padding: '5px 12px',
-      background: active ? 'var(--accent)' : 'transparent',
-      border: `1px solid ${active ? 'var(--accent)' : 'var(--border)'}`,
-      color: active ? '#fff' : 'var(--text-secondary)',
-      fontSize: '11px', borderRadius: '2px',
-      cursor: 'pointer', fontFamily: 'var(--sans)',
-      transition: 'all var(--fast)',
-    }}>
-      {label}
-    </button>
   );
 }
